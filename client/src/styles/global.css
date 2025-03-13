@@ -1,0 +1,62 @@
+@import './utilities.css';
+@import './theme.css';
+@import './typography.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('/static/Archivo-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'PowerGrotesk';
+  src: url('/static/PowerGrotesk-Regular.ttf') format('truetype');
+}
+
+html {
+  overflow-x: hidden;
+  font-family: 'Archivo';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+.body {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.body {
+  display: grid;
+  grid-template-rows: max-content 1fr; /* Navbar takes max-content, children takes remaining space */
+}
+
+.children,
+.children-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.children {
+  width: 100%; /* Use 100% of available space within parent */
+  height: 100%; /* Make sure it grows to fill the available space */
+  min-height: 0; /* Important to avoid unwanted overflow in grid children */
+  overflow-y: auto; /* Scroll only within the children */
+  @apply scrollbar-none; /* Custom Tailwind scrollbar styles */
+}
+
+.children-content {
+  flex-grow: 1;
+  padding: 1.5rem;
+  padding-top: 3rem;
+  padding-bottom: 5rem;
+}
+
+.page {
+  @apply flex flex-col gap-6 w-full max-w-screen-lg self-center;
+}
