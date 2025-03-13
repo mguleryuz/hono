@@ -18,5 +18,14 @@ export default ({ mode }: { mode: string }) => {
         '@c': path.resolve(__dirname, './src'),
       },
     },
+    server: {
+      host: true,
+      proxy: {
+        '/static': {
+          target: `http://127.0.0.1:${process.env.PORT ? parseInt(process.env.PORT) : 8080}`,
+          changeOrigin: true,
+        },
+      },
+    },
   })
 }

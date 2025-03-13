@@ -27,7 +27,7 @@ A lightning-fast web application template using Hono.js and Bun runtime, with Mo
 1. Clone the repository:
 
 ```sh
-git clone https://github.com/InverterNetwork/hono.git
+git clone https://github.com/mguleryuz/hono.git
 ```
 
 2. Install dependencies:

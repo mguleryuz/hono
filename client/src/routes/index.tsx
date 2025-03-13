@@ -11,7 +11,7 @@ function AdminComponent() {
     <div className="page">
       <div className="flex flex-col items-center justify-center gap-5 m-auto max-w-sm text-center">
         <Flame size={100} />
-        <h1>Welcome to Inverter Network Hono + Vite Server!</h1>
+        <h1>Welcome to Hono + Vite Server!</h1>
       </div>
     </div>
   )

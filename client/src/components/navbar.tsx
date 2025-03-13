@@ -28,8 +28,9 @@ export function Navbar() {
         <Link to="/">
           <img
             src="/static/light_text_icon.svg"
-            alt="Inverter Network"
-            className="w-18 h-18"
+            alt="Vite"
+            width={40}
+            height={40}
           />
         </Link>
 

@@ -22,8 +22,8 @@
     "eslint": "^9.13.0"
   },
   "peerDependencies": {
-    "@inverter-network/abis": "^0.3.6",
-    "@inverter-network/sdk": "^0.3.14",
+    "@inverter-network/abis": "^0.3.31",
+    "@inverter-network/sdk": "^0.4.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@hookform/resolvers": "^3.9.0",
