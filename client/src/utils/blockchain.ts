@@ -1,7 +1,7 @@
 import { http } from 'viem'
 
 // DRPC API configuration
-const drpcApiKey = process.env.NEXT_PUBLIC_DRPC_API_KEY
+const drpcApiKey = process.env.VITE_DRPC_API_KEY
 
 // Mapping of chain IDs to DRPC network identifiers
 export const drpcChainIdMap = {

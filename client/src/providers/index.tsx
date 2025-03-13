@@ -8,6 +8,8 @@ import { InverterProvider } from './inverter-provider'
 import { ConnectorProvider } from './connector-provider'
 import { AppProvider } from './app-context'
 
+const isDev = process.env.NODE_ENV === 'development'
+
 const queryClient = new QueryClient()
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -27,7 +29,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           duration={5_000}
         />
       </ConnectorProvider>
-      <TanStackRouterDevtools position="bottom-left" />
+      {isDev && <TanStackRouterDevtools position="bottom-left" />}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

@@ -14,6 +14,9 @@ export default ({ mode }: { mode: string }) => {
   const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8080
 
   return defineConfig({
+    define: {
+      'process.env': process.env,
+    },
     plugins: [TanStackRouterVite({}), react()],
     resolve: {
       alias: {
