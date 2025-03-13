@@ -25,7 +25,7 @@ RUN bun install \
 FROM base AS build
 COPY --from=install /usr/src/app/dev_modules ./node_modules
 COPY . .
-RUN bun --cwd=client vite build
+RUN bun build:client
 
 # Production stage
 FROM base AS release
