@@ -11,6 +11,8 @@ export default ({ mode }: { mode: string }) => {
     ...loadEnv(mode, path.resolve(__dirname, '..')),
   }
 
+  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8080
+
   return defineConfig({
     plugins: [TanStackRouterVite({}), react()],
     resolve: {
@@ -22,7 +24,11 @@ export default ({ mode }: { mode: string }) => {
       host: true,
       proxy: {
         '/static': {
-          target: `http://127.0.0.1:${process.env.PORT ? parseInt(process.env.PORT) : 8080}`,
+          target: `http://127.0.0.1:${PORT}`,
+          changeOrigin: true,
+        },
+        '/api': {
+          target: `http://127.0.0.1:${PORT}`,
           changeOrigin: true,
         },
       },
