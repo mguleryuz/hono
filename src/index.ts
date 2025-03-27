@@ -6,12 +6,12 @@ import { serveStatic } from 'hono/bun'
 
 // Database
 import mongoose from 'mongoose'
-import { connectDB } from '@/utils'
+import { connectDB } from '@/utils/server'
 
 // Local imports
 import { Routes } from '@/routes'
 import { MainService } from '@/services'
-import { serveClientHtml, ascii_welcome_div } from './utils'
+import { serveClientHtml, ascii_welcome_div } from '@/utils'
 import { sessionMiddleware } from '@/middlewares'
 
 // Environment configuration

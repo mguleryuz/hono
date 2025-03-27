@@ -33,10 +33,13 @@ import {
   viemChainsToDynamic,
   getDrpcTransport,
 } from '@c/utils'
+import { getDynamicId } from '@/utils'
 
 // ============================================================================
 // Constants & Configuration
 // ============================================================================
+
+const dynamicId = getDynamicId()
 
 // Supported blockchain networks
 const chains = [
@@ -101,7 +104,7 @@ export function ConnectorProvider({ children }: { children: React.ReactNode }) {
   const settings = useMemo(
     () =>
       ({
-        environmentId: import.meta.env.VITE_DYNAMIC_ID || '',
+        environmentId: dynamicId,
         cssOverrides,
         walletConnectors: [EthereumWalletConnectors],
         overrides: {

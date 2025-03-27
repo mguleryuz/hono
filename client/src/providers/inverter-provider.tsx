@@ -32,6 +32,7 @@ export function InverterProvider({ children }: { children: React.ReactNode }) {
     'chart-5': 'var(--chart-5)',
     border: 'var(--border)',
     input: 'var(--input)',
+    ring: 'var(--ring)',
   }
   return (
     <InverterProviderCore
@@ -39,7 +40,6 @@ export function InverterProvider({ children }: { children: React.ReactNode }) {
         theme: 'dark',
         baseTheme: {
           radius: 'var(--radius)',
-          ring: 'var(--ring)',
         },
         darkTheme: sharedThemes,
         lightTheme: sharedThemes,

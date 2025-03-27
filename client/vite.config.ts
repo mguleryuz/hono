@@ -5,6 +5,12 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 
 // https://vitejs.dev/config/
 export default ({ mode }: { mode: string }) => {
+  // Set the server path based on the environment
+  const serverPath =
+    process.env.NODE_ENV === 'production'
+      ? path.resolve(__dirname, '../dist')
+      : path.resolve(__dirname, '../src')
+
   // Load env vars from parent directory
   process.env = {
     ...process.env,
@@ -20,6 +26,7 @@ export default ({ mode }: { mode: string }) => {
     plugins: [TanStackRouterVite({}), react()],
     resolve: {
       alias: {
+        '@': serverPath,
         '@c': path.resolve(__dirname, './src'),
       },
     },

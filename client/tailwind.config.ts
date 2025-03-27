@@ -1,8 +1,13 @@
 import type { Config as TailwindConfig } from 'tailwindcss'
+import fluid, { extract, screens, fontSize } from 'fluid-tailwind'
+import typography from '@tailwindcss/typography'
+import animate from 'tailwindcss-animate'
 
 const config: TailwindConfig = {
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {
+    screens,
+    fontSize,
     extend: {
       borderRadius: {
         lg: 'var(--radius)',
@@ -75,8 +80,8 @@ const config: TailwindConfig = {
       },
     },
   },
-  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
-  plugins: [require('@tailwindcss/typography'), require('tailwindcss-animate')],
+  content: { files: ['./src/**/*.{js,ts,jsx,tsx,mdx}'], extract },
+  plugins: [typography, animate, fluid],
 }
 
 export default config

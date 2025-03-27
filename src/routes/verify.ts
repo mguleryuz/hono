@@ -1,6 +1,7 @@
 import { UserModel } from '@/lib/mongo'
 import { type Auth } from '@/types'
-import { getBearerToken, getDynamicId, getPublicKeyFromJWKS } from '@/utils'
+import { getDynamicId } from '@/utils'
+import { getBearerToken, getPublicKeyFromJWKS } from '@/utils/server'
 import { apiResponse, HTTPError } from '@inverter-network/sdk'
 import type { Context } from 'hono'
 import jwt from 'jsonwebtoken'

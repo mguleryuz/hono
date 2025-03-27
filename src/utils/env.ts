@@ -2,7 +2,8 @@ const getEnvValue = <T>(
   envKey: string,
   awsSecretKey: string,
   errorMessage: string,
-  parser: (value: string) => T = (value) => value as T
+  parser: (value: string) => T = (value) => value as T,
+  fallback?: T
 ): T => {
   // Set value to undefined
   let value: T | undefined
@@ -15,8 +16,11 @@ const getEnvValue = <T>(
     const awsSecret = JSON.parse(process.env.AWS_SECRET)
     value = parser(awsSecret[awsSecretKey])
   }
-  // If the value is not set, throw an error
-  if (value === undefined) throw new Error(errorMessage)
+  // If the value is not set, use fallback or throw error
+  if (value === undefined) {
+    if (fallback !== undefined) return fallback
+    throw new Error(errorMessage)
+  }
   // Return the value
   return value
 }
@@ -26,3 +30,6 @@ export const getMongoUri = (): string =>
 
 export const getDynamicId = (): string =>
   getEnvValue('VITE_DYNAMIC_ID', 'VITE_DYNAMIC_ID', 'Dynamic ID not found')
+
+export const getSessionSecret = (): string =>
+  getEnvValue('SESSION_SECRET', 'SESSION_SECRET', 'Session secret not found')
