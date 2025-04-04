@@ -6,6 +6,7 @@ declare module 'hono' {
   interface HonoRequest
     extends RequestSessionExtender<{
       auth: Auth & {
+        nonce?: string
         twitterState?: string
         twitterCodeVerifier?: string
         twitterAccessTokenExpiresAt?: Date

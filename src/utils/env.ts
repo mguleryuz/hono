@@ -15,6 +15,9 @@ export const getOpenAiApiKey = (): string =>
     ''
   )
 
+export const getDrpcApiKey = (): string =>
+  getEnvValue('DRPC_API_KEY', 'DRPC_API_KEY', 'DRPC API Key not found', '')
+
 // Twitter/X Related
 export const getXClientId = (): string =>
   getEnvValue('X_CLIENT_ID', 'X_CLIENT_ID', 'X Client ID not found', '')

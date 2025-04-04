@@ -20,5 +20,3 @@ export const copyToClipboard = async (text?: string) => {
     toast.error('Failed to copy')
   }
 }
-
-export * from './blockchain'

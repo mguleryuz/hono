@@ -2,6 +2,7 @@ import type { StatusCode } from 'hono/utils/http-status'
 
 export * from './env'
 export * from './logger'
+export * from './blockchain'
 
 export class HTTPError extends Error {
   statusCode: StatusCode

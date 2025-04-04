@@ -3,6 +3,7 @@ import { serveStatic } from 'hono/bun'
 import { serveClientHtml } from '@/utils/server'
 import { users } from './users'
 import { authX } from './auth.x'
+import { authEvm } from './auth.evm'
 
 export class Routes {
   constructor(app: Hono, isDev: boolean) {
@@ -20,6 +21,7 @@ export class Routes {
     // Assign the API routes
     users(api)
     authX(api)
+    authEvm(api)
 
     // Client-side routing - these should come AFTER API routes
     if (isDev) {

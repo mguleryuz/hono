@@ -14,6 +14,7 @@ import { Routes } from '@/routes'
 import { Jobs } from '@/jobs'
 import { TwitterService } from './twitter.service'
 import { AuthXService } from './auth.x.service'
+import { AuthEvmService } from './auth.evm.service'
 
 // ------------------------------------------------------------
 // Server
@@ -47,7 +48,8 @@ app.use(sessionMiddleware())
 // Start services
 export const bucketService = new BucketService()
 export const twitterService = new TwitterService()
-export const authService = new AuthXService(twitterService.client)
+export const authXService = new AuthXService(twitterService.client)
+export const authEvmService = new AuthEvmService()
 
 // Setup routes
 new Routes(app, isDev)

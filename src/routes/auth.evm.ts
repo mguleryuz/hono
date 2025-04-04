@@ -1,54 +1,56 @@
-import type { HTTPError } from '@/utils'
 import { Hono } from 'hono'
+import { authEvmService } from '..'
+import type { HTTPError } from '@/utils'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
-import { authXService } from '..'
 
-export const authX = (api: Hono) => {
-  api.get('/auth/x/login', async (ctx) => {
+export const authEvm = (api: Hono) => {
+  api.get('/auth/evm/nonce', async (c) => {
     try {
-      return authXService.twitterLogin(ctx)
+      const nonce = await authEvmService.nonce(c)
+      return c.text(nonce)
     } catch (error: unknown) {
       const e = error as HTTPError
-      return ctx.json(
+
+      return c.json(
         { message: e.message },
         e.statusCode as ContentfulStatusCode
       )
     }
   })
 
-  api.get('/auth/x/callback', async (ctx) => {
+  api.post('/auth/evm/verify', async (c) => {
     try {
-      // Handle the callback, return the redirect
-      return await authXService.twitterCallback(ctx)
+      const result = await authEvmService.verify(c)
+      return c.json(result)
     } catch (error: unknown) {
       const e = error as HTTPError
-      // Return the error
-      return ctx.json(
+      return c.json(
         { message: e.message },
         e.statusCode as ContentfulStatusCode
       )
     }
   })
 
-  api.get('/auth/x/current-user', async (ctx) => {
+  api.get('/auth/evm/session', async (c) => {
     try {
-      const result = await authXService.getCurrentUser(ctx)
-      return ctx.json(result)
+      const result = await authEvmService.session(c)
+      return c.json(result)
     } catch (error: unknown) {
       const e = error as HTTPError
-      return ctx.json(
+      return c.json(
         { message: e.message },
         e.statusCode as ContentfulStatusCode
       )
     }
   })
 
-  api.get('/auth/x/logout', async (ctx) => {
+  api.post('/auth/evm/signout', async (c) => {
     try {
-      return ctx.json(authXService.logout(ctx))
+      const result = await authEvmService.signout(c)
+      return c.json(result)
     } catch (error: unknown) {
       const e = error as HTTPError
-      return ctx.json(
+      return c.json(
         { message: e.message },
         e.statusCode as ContentfulStatusCode
       )

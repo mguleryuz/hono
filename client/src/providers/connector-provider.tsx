@@ -3,22 +3,15 @@
 // Third-party dependencies
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
 import type { HttpTransport } from 'viem'
-import { sepolia, polygon } from 'viem/chains'
 import { WagmiProvider } from 'wagmi'
 
-import { getDrpcTransport } from '@c/utils'
-
-// ----------------------------------------------------------------------------
-// Constants & Configuration
-
-// Supported blockchain networks
-const chains = [polygon, sepolia] as const
+import { chains, getDrpcTransport } from '@/utils'
 
 /**
  * Creates Wagmi configuration with specified chains and transport settings
  */
 const config = getDefaultConfig({
-  chains: chains,
+  chains,
   projectId: '<project_name>',
   appName: '<project_name>',
   multiInjectedProviderDiscovery: false,
