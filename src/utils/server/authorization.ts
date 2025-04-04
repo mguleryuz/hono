@@ -4,38 +4,51 @@ import { scrypt, randomBytes } from 'crypto'
 import { promisify } from 'util'
 import type { UserRole } from '@/types'
 import type { Context } from 'hono'
-import { authorized, HTTPError } from '@inverter-network/sdk'
+import { HTTPError } from '..'
 
-type Hex = `0x${string}`
+/**
+ * Asserts that a value is not undefined or null
+ * @template T - The type of the value
+ * @param value - The value to assert
+ * @param message - The message to throw if the value is undefined or null
+ * @throws HTTPError if the value is undefined or null
+ */
+export function authorized(value: any, message?: string) {
+  if (!value)
+    throw new HTTPError(
+      !!message ? `Unauthorized: ${message}` : 'Unauthorized',
+      401
+    )
+}
 
 // Updated adminOnly function
 export async function adminOnly(ctx: Context): Promise<{
   role: UserRole
-  address: Hex | string
+  id: string
 }> {
-  const { role, address } = await getUserRoleFromTokenOrSession({ ctx })
+  const { role, id } = await getUserRoleFromTokenOrSession({ ctx })
 
   authorized(role)
 
   const isAdmin = ['ADMIN', 'SUPER'].includes(role)
   authorized(isAdmin, 'User is not an admin')
 
-  return { role, address }
+  return { role, id }
 }
 
 // Updated superOnly function
 export async function superOnly(ctx: Context): Promise<{
   role: UserRole
-  address: Hex | string
+  id: string
 }> {
-  const { role, address } = await getUserRoleFromTokenOrSession({ ctx })
+  const { role, id } = await getUserRoleFromTokenOrSession({ ctx })
 
   authorized(role)
 
   const isSuper = role === 'SUPER'
   authorized(isSuper, 'User is not a super admin')
 
-  return { role, address }
+  return { role, id }
 }
 
 async function getUserRoleFromTokenOrSession({
@@ -44,13 +57,13 @@ async function getUserRoleFromTokenOrSession({
   ctx: Context
 }): Promise<{
   role: UserRole
-  address: Hex | string
+  id: string
 }> {
   const sessionRole = ctx.req.session?.auth?.role
-  const sessionAddress = ctx.req.session?.auth?.address
+  const sessionId = ctx.req.session?.auth?.id
 
-  if (sessionRole && sessionAddress) {
-    return { role: sessionRole, address: sessionAddress }
+  if (sessionRole && sessionId) {
+    return { role: sessionRole, id: sessionId }
   }
 
   throw new HTTPError('No session found', 401)

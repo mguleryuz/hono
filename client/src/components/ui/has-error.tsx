@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import { JsonView } from '@inverter-network/react/client'
-import { Button } from '@inverter-network/react'
+import { JsonView } from './json-view'
+import { Button } from './button'
 
 export function HasError({ error, reset }: { error: any; reset?: () => void }) {
   return (

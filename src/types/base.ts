@@ -2,6 +2,7 @@ import type { User } from '@/types'
 
 export type Auth = {
   id: string
+  status?: 'unauthenticated' | 'authenticated' | 'loading'
 } & Pick<
   User,
   | 'role'

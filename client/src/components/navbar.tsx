@@ -1,17 +1,17 @@
 'use client'
 
-import { Button } from '@inverter-network/react'
+import { Button } from '@c/components/ui/button'
+import { Home, Menu } from 'lucide-react'
+import { WalletWidget } from './wallet-widget'
+import { Link, useLocation } from '@tanstack/react-router'
+import { Separator } from './ui/separator'
 import {
   Drawer,
   DrawerContent,
   DrawerDescription,
   DrawerTitle,
   DrawerTrigger,
-  Separator,
-} from '@inverter-network/react/client'
-import { Home, Menu } from 'lucide-react'
-import { WalletWidget } from './wallet-widget'
-import { Link, useLocation } from '@tanstack/react-router'
+} from './ui/drawer'
 
 export function Navbar() {
   const pathname = useLocation().pathname

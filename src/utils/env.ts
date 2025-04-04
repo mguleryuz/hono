@@ -92,6 +92,14 @@ export const getSessionSecret = (): string =>
     ''
   )
 
+export const getAuthMethod = (): 'evm' | 'twitter' | 'none' =>
+  getEnvValue(
+    'AUTH_METHOD',
+    'AUTH_METHOD',
+    'Authentication method not found',
+    'none'
+  )
+
 // -----------------------------------------------------------------------------
 // HELPER
 

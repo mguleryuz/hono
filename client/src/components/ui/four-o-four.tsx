@@ -1,5 +1,5 @@
-import { Button } from '@inverter-network/react'
-import { Separator } from '@inverter-network/react/client'
+import { Button } from './button'
+import { Separator } from './separator'
 import { Link } from '@tanstack/react-router'
 
 export function FourOFour() {

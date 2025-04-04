@@ -1,6 +1,5 @@
 'use client'
 
-import { useAuth } from '@c/hooks'
 import { createContext, useContext } from 'react'
 
 export type TAppContext = {}
@@ -8,8 +7,6 @@ export type TAppContext = {}
 const AppContext = createContext({} as TAppContext)
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  useAuth()
-
   // CONTEXT
   //==============================================
   const contextData: TAppContext = {}
