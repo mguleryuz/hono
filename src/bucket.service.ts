@@ -1,15 +1,37 @@
 import { Readable } from 'stream'
 import mongoose from 'mongoose'
-import type { PrunedFile } from '@inverter-network/sdk'
 
-import type {
-  BucketExistsParams,
-  BucketExistsReturnType,
-  GetBucketParams,
-  GetBucketReturnType,
-  UploadBucketParams,
-  UploadBucketReturnType,
-} from '@/types'
+export type PrunedFile = {
+  string: string
+  type: string
+  name: string
+}
+
+// PARAMS
+// ----------------------------------------------------------------------------
+export type BucketExistsParams = {
+  filename: string
+}
+
+export type GetBucketParams = {
+  filename: string
+}
+
+export type UploadBucketParams = {
+  prunedFile: PrunedFile
+}
+
+// RETURN TYPE
+// ----------------------------------------------------------------------------
+export type BucketExistsReturnType = boolean
+
+export type GetBucketReturnType = {
+  stream: Readable
+  contentType: string
+}
+
+export type UploadBucketReturnType =
+  `${string}-${string}-${string}-${string}-${string}`
 
 export class BucketService {
   private readonly bucket = mongoose.connection.bucket

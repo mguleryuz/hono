@@ -33,6 +33,7 @@ import {
   viemChainsToDynamic,
   getDrpcTransport,
 } from '@c/utils'
+// @ts-ignore
 import { getDynamicId } from '@/utils'
 
 // ============================================================================

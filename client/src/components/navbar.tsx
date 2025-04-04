@@ -26,12 +26,7 @@ export function Navbar() {
     >
       <div className="flex items-center gap-2">
         <Link to="/">
-          <img
-            src="/static/light_text_icon.svg"
-            alt="Vite"
-            width={40}
-            height={40}
-          />
+          <img src="/images/icon.svg" alt="Vite" width={40} height={40} />
         </Link>
 
         <Separator orientation="vertical" />

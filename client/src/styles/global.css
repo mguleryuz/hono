@@ -8,12 +8,12 @@
 
 @font-face {
   font-family: 'Archivo';
-  src: url('/static/Archivo-Regular.ttf') format('truetype');
+  src: url('/fonts/Archivo-Regular.ttf') format('truetype');
 }
 
 @font-face {
   font-family: 'PowerGrotesk';
-  src: url('/static/PowerGrotesk-Regular.ttf') format('truetype');
+  src: url('/fonts/PowerGrotesk-Regular.ttf') format('truetype');
 }
 
 html {

@@ -1,4 +1,3 @@
-export * from '@/lib/mongo/types'
-export * from '@/services/types'
+export type * from '@/mongo'
 export * from './base'
-export * from './user'
+export * from './socialdata'

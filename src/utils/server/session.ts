@@ -1,17 +1,18 @@
 import session from 'hono-sess'
 import MongoStore from 'connect-mongo'
-import { type Mongoose } from 'mongoose'
+import mongoose from 'mongoose'
+import { getSessionSecret } from '@/utils'
 
-export const sessionMiddleware = (mongoose?: Mongoose) => {
-  if (!mongoose) throw new Error('Mongoose instance is required')
-
+export const sessionMiddleware = () => {
   const mongoStore = MongoStore.create({
     client: mongoose.connection.getClient(),
     stringify: false,
   })
 
+  const secret = getSessionSecret()
+
   return session({
-    secret: process.env.SESSION_SECRET || 'dev-secret',
+    secret,
     resave: false,
     saveUninitialized: false,
     store: mongoStore,

@@ -1,4 +1,4 @@
-import { JobScheduleModel, type JobType } from '@/lib/mongo'
+import { JobScheduleModel, type JobType } from '@/mongo'
 import { Cron, scheduledJobs } from 'croner'
 
 /** Configuration for a scheduled job */
