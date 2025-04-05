@@ -3,10 +3,14 @@
 import * as React from 'react'
 import { useChainSpecs, useEvmAuth } from '@c/hooks'
 import { cn } from '@c/utils'
+import { getAuthMethod } from '@/utils/env'
 import { Button } from './ui/button'
 import type { ButtonProps } from './ui/button'
 import { CircleAlert, Pointer, Wallet } from 'lucide-react'
 import { useAccountModal, useConnectModal } from '@rainbow-me/rainbowkit'
+
+const authMethod = getAuthMethod()
+const isEvmAuth = authMethod === 'evm'
 
 const compressAddress = (address?: string) => {
   if (!address) return '...'
@@ -29,7 +33,7 @@ export function WalletWidget(props: WalletWidgetProps) {
   const auth = useEvmAuth()
 
   const setShowWalletWidget = () =>
-    !isConnected || auth.data.status !== 'authenticated'
+    !isConnected || (isEvmAuth && auth.data.status !== 'authenticated')
       ? openConnectModal?.()
       : openAccountModal?.()
 

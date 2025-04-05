@@ -14,6 +14,10 @@ export class AuthEvmService {
   async nonce(c: Context) {
     const nonce = generateSiweNonce()
 
+    if (!c.req.session.auth) {
+      c.req.session.auth = {} as any
+    }
+
     c.req.session.auth.nonce = nonce
 
     return nonce
@@ -98,6 +102,8 @@ export class AuthEvmService {
 
   async signout(c: Context) {
     c.req.session.destroy()
+
+    console.log('signout', c.req.session.auth)
 
     return { success: true }
   }

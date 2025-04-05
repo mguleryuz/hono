@@ -1,6 +1,10 @@
 import type { Auth } from '@/types'
+import { getAuthMethod } from '@/utils/env'
 import { useQuery } from '@tanstack/react-query'
 import { useAccount } from 'wagmi'
+
+const authMethod = getAuthMethod()
+const isEvmAuthEnabled = authMethod === 'evm'
 
 export type UseEvmAuthReturnType = ReturnType<typeof useEvmAuth>
 
@@ -10,11 +14,19 @@ export function useEvmAuth() {
   const authQuery = useQuery({
     queryKey: ['auth', isConnected],
     queryFn: async () => {
-      const res = await fetch('/api/auth/session', {
+      const res = await fetch('/api/auth/evm/session', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       })
+
+      if (!res.ok) {
+        return {
+          address: null,
+          role: null,
+          status: 'unauthenticated' as any,
+        }
+      }
 
       const json = <
         | Auth
@@ -32,7 +44,7 @@ export function useEvmAuth() {
       role: null,
       status: 'unauthenticated',
     },
-    enabled: isConnected,
+    enabled: isEvmAuthEnabled && isConnected,
     refetchOnWindowFocus: false,
     retry: false,
   })
@@ -42,7 +54,7 @@ export function useEvmAuth() {
     data: {
       ...authQuery.data,
       status:
-        authQuery.isPending || authQuery.isLoading || authQuery.isFetching
+        authQuery.isFetching || authQuery.isLoading || authQuery.isRefetching
           ? 'loading'
           : authQuery.data.status,
     },

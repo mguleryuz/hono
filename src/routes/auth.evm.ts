@@ -44,7 +44,7 @@ export const authEvm = (api: Hono) => {
     }
   })
 
-  api.post('/auth/evm/signout', async (c) => {
+  api.get('/auth/evm/signout', async (c) => {
     try {
       const result = await authEvmService.signout(c)
       return c.json(result)

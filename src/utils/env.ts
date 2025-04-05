@@ -8,7 +8,7 @@ export const getOpenAiApiKey = () =>
   getEnvValue<string>('OPENAI_API_KEY', 'OPENAI_API_KEY')
 
 export const getDrpcApiKey = () =>
-  getEnvValue<string>('DRPC_API_KEY', 'DRPC_API_KEY')
+  getEnvValue<string>('VITE_DRPC_API_KEY', 'VITE_DRPC_API_KEY')
 
 // Twitter/X Related
 export const getXClientId = () =>
@@ -54,7 +54,11 @@ export const getSessionSecret = () =>
   getEnvValue('SESSION_SECRET', 'SESSION_SECRET', 'SESSION_SECRET')
 
 export const getAuthMethod = () =>
-  getEnvValue<'evm' | 'twitter' | 'none'>('AUTH_METHOD', 'AUTH_METHOD', 'none')
+  getEnvValue<'evm' | 'twitter' | 'none'>(
+    'VITE_AUTH_METHOD',
+    'VITE_AUTH_METHOD',
+    'none'
+  )
 
 // -----------------------------------------------------------------------------
 // HELPER

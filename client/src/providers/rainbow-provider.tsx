@@ -68,7 +68,7 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
   return (
     <RainbowKitAuthenticationProvider
       adapter={authenticationAdapter}
-      status={auth.data.status ?? 'unauthenticated'}
+      status={auth.data.status!}
       enabled={isEvmAuth}
     >
       <RainbowKitProvider
@@ -116,8 +116,8 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
             modalTextDim: 'hsl(var(--muted-foreground))',
             modalTextSecondary: 'hsl(var(--muted-foreground))',
             profileAction: 'hsl(var(--muted))',
-            profileActionHover: 'hsl(var(--muted-foreground))',
-            profileForeground: 'hsl(var(--foreground))',
+            profileActionHover: 'hsl(var(--muted))',
+            profileForeground: 'hsl(var(--background))',
             selectedOptionBorder: 'hsl(var(--accent))',
             standby: 'hsl(var(--secondary))',
           },
