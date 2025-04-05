@@ -6,7 +6,7 @@ import type {
 } from './types'
 
 export class SocialDataService {
-  private readonly apiKey: string
+  private readonly apiKey: string | undefined
 
   constructor() {
     this.apiKey = getSocialDataToolsApiKey()

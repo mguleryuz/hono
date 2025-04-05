@@ -1,10 +1,10 @@
 import mongoose from 'mongoose'
 import { getMongoUri } from '../env'
 
-const MONGO_URI = getMongoUri()
-
 export async function connectDB() {
   try {
+    const MONGO_URI = getMongoUri()
+
     // Check if URI exists
     if (!MONGO_URI) {
       throw new Error('MongoDB URI is not defined in environment variables')
@@ -46,8 +46,6 @@ export async function connectDB() {
         '🔒 Verify that your Docker container IP is allowed in MongoDB Atlas network access settings'
       )
     }
-
-    throw error
   }
 
   return

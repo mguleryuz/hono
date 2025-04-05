@@ -10,8 +10,8 @@ import {
 } from '@/utils'
 
 export class TwitterService {
-  private readonly _client: TwitterApi
-  private readonly _userClient: TwitterApi
+  private readonly _client: TwitterApi | undefined
+  private readonly _userClient: TwitterApi | undefined
 
   constructor() {
     const clientId = getXClientId()
@@ -21,13 +21,18 @@ export class TwitterService {
     const appKey = getTwitterApiKey()
     const appSecret = getTwitterApiSecret()
 
-    this._client = new TwitterApi({ clientId, clientSecret })
-    this._userClient = new TwitterApi({
-      appKey,
-      appSecret,
-      accessToken,
-      accessSecret,
-    })
+    if (clientId && clientSecret) {
+      this._client = new TwitterApi({ clientId, clientSecret })
+    }
+
+    if (appKey && appSecret && accessToken && accessSecret) {
+      this._userClient = new TwitterApi({
+        appKey,
+        appSecret,
+        accessToken,
+        accessSecret,
+      })
+    }
   }
 
   get client() {

@@ -5,6 +5,7 @@ import { cors } from 'hono/cors'
 
 // Utils
 import { connectDB, sessionMiddleware } from '@/utils/server'
+import { logger as log } from '@/utils/logger'
 
 // Services
 import { BucketService } from '@/bucket.service'
@@ -43,7 +44,11 @@ app.use(
 await connectDB()
 
 // Session handling
-app.use(sessionMiddleware())
+try {
+  app.use(sessionMiddleware())
+} catch {
+  log.warn('Session middleware failed to initialize ⚠️, skipping...')
+}
 
 // Start services
 export const bucketService = new BucketService()

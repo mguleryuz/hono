@@ -11,14 +11,14 @@ import { getOrigin, HTTPError } from '@/utils'
  * Service handling Twitter OAuth authentication flow and user session management
  */
 export class AuthXService {
-  private readonly client: TwitterApi
+  private readonly client: TwitterApi | undefined
   private readonly callbackUrl: string
 
   /**
    * Initialize the AuthService with a Twitter API client
    */
-  constructor(client: TwitterApi) {
-    this.client = client
+  constructor(client: TwitterApi | undefined) {
+    if (client) this.client = client
     this.callbackUrl = `${getOrigin()}/api/auth/callback`
   }
 
@@ -30,6 +30,10 @@ export class AuthXService {
    * Generate Twitter OAuth URL with required scopes
    */
   generateAuthLink = () => {
+    if (!this.client) {
+      throw new HTTPError('Twitter client not initialized', 500)
+    }
+
     return this.client.generateOAuth2AuthLink(this.callbackUrl, {
       scope: [
         'tweet.read',
@@ -85,6 +89,10 @@ export class AuthXService {
     }
 
     try {
+      if (!this.client) {
+        throw new HTTPError('Twitter client not initialized', 500)
+      }
+
       // Exchange authorization code for access tokens
       const { client, accessToken, refreshToken, expiresIn } =
         await this.client.loginWithOAuth2({
@@ -245,6 +253,10 @@ export class AuthXService {
 
     // Use refresh token to get new access token
     try {
+      if (!this.client) {
+        throw new HTTPError('Twitter client not initialized', 500)
+      }
+
       // Exchange refresh token for new tokens
       const { accessToken, refreshToken, expiresIn } =
         await this.client.refreshOAuth2Token(decryptedRefreshToken)
