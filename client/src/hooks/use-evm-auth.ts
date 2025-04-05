@@ -33,6 +33,8 @@ export function useEvmAuth() {
       status: 'unauthenticated',
     },
     enabled: isConnected,
+    refetchOnWindowFocus: false,
+    retry: false,
   })
 
   return {
