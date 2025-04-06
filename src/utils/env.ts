@@ -1,4 +1,5 @@
 import { logger } from './logger'
+import chalk from 'chalk'
 
 // Social Data / API Keys
 export const getSocialDataToolsApiKey = () =>
@@ -106,7 +107,9 @@ function getEnvValue<T>(
     if (fallback !== undefined) {
       return fallback
     }
-    logger.warn(`No environment variable found for ${envKey} ⚠️, skipping...`)
+    logger.warn(
+      `No environment variable found for ${chalk.bold(envKey)}, skipping...`
+    )
     return undefined
   }
   // Return the value

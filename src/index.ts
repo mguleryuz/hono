@@ -4,7 +4,7 @@ import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 
 // Utils
-import { connectDB, sessionMiddleware } from '@/utils/server'
+import { connectDb, sessionMiddleware } from '@/utils/server'
 import { logger as log } from '@/utils/logger'
 
 // Services
@@ -42,7 +42,7 @@ app.use(
 )
 
 // Database connection
-await connectDB()
+await connectDb()
 
 // Session handling
 try {
