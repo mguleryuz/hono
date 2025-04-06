@@ -8,6 +8,8 @@ import {
   getXClientSecret,
   logger,
 } from '@/utils'
+import { authXService } from '.'
+import type { User } from './types'
 
 export class TwitterService {
   private readonly _client: TwitterApi | undefined
@@ -42,11 +44,33 @@ export class TwitterService {
   get userClient() {
     return this._userClient
   }
+
+  async createAuthenticatedClient(
+    user: User & { id: string }
+  ): Promise<TwitterApi | null> {
+    try {
+      const accessToken = await authXService.getAccessToken(user.id)
+
+      if (!accessToken) {
+        logger.error(`Invalid access token for user ${user.twitterUsername}`)
+        return null
+      }
+
+      const userTwitterClient = new TwitterApi(accessToken)
+      const meResult = await userTwitterClient.v2.me()
+      logger.info(`Successfully authenticated as: ${meResult.data.username}`)
+
+      return userTwitterClient
+    } catch (error: any) {
+      handleTwitterApiError(error, user.twitterUserId, 'Client authentication')
+      return null
+    }
+  }
 }
 
 export function handleTwitterApiError(
   error: any,
-  userId: string,
+  userId: string | undefined,
   operation: string
 ): void {
   logger.error(`${operation} failed: ${error.message}`)

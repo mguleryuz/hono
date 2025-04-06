@@ -78,6 +78,15 @@ export interface SocialDataUserTweetsMonitor {
   }
 }
 
+export interface SocialDataActiveMonitorsResponse {
+  data: SocialDataUserTweetsMonitor[]
+  meta: {
+    page: number
+    last_page: number
+    items_count: number
+  }
+}
+
 export type SocialDataUserTweetsMonitorResponse =
   | {
       status: 'success'

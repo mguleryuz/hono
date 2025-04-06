@@ -1,5 +1,6 @@
 import { getSocialDataToolsApiKey, logger } from '@/utils'
 import type {
+  SocialDataActiveMonitorsResponse,
   SocialDataSearchResponse,
   SocialDataUserTweetsMonitorResponse,
   TwitterSearchQuery,
@@ -10,90 +11,6 @@ export class SocialDataService {
 
   constructor() {
     this.apiKey = getSocialDataToolsApiKey()
-  }
-
-  /**
-   * Make a GET request to the Social Data Tools API
-   * @param endpoint API endpoint
-   * @param params Query parameters
-   * @returns Response data
-   */
-  private async apiGet<T>(
-    endpoint: string,
-    params: Record<string, string> = {}
-  ): Promise<T> {
-    const url = new URL(`https://api.socialdata.tools${endpoint}`)
-
-    // Add all parameters to the URL
-    Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.append(key, value)
-    })
-
-    logger.info(`Making API request to ${url.pathname}`)
-
-    try {
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          Accept: 'application/json',
-        },
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        logger.error(`Social Data API error: ${response.status} - ${errorText}`)
-        throw new Error(
-          `Social Data API error: ${response.status} - ${errorText}`
-        )
-      }
-
-      return (await response.json()) as T
-    } catch (error) {
-      logger.error(
-        `API error: ${error instanceof Error ? error.message : String(error)}`
-      )
-      throw error
-    }
-  }
-
-  /**
-   * Make a POST request to the Social Data Tools API
-   * @param endpoint API endpoint
-   * @param data Request body
-   * @returns Response data
-   */
-  private async apiPost<T>(
-    endpoint: string,
-    data: Record<string, any>
-  ): Promise<T> {
-    const url = new URL(`https://api.socialdata.tools${endpoint}`)
-
-    try {
-      const response = await fetch(url.toString(), {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        logger.error(`Social Data API error: ${response.status} - ${errorText}`)
-        throw new Error(
-          `Social Data API error: ${response.status} - ${errorText}`
-        )
-      }
-
-      return (await response.json()) as T
-    } catch (error) {
-      logger.error(
-        `API error: ${error instanceof Error ? error.message : String(error)}`
-      )
-      throw error
-    }
   }
 
   /**
@@ -122,7 +39,8 @@ export class SocialDataService {
 
     try {
       logger.info(`Searching tweets with query: ${queryString}`)
-      const data = await this.apiGet<SocialDataSearchResponse>(
+      const data = await this.apiFetch<'GET', SocialDataSearchResponse>(
+        'GET',
         `/twitter/search?query=${encodeURIComponent(queryString)}&type=${type}`,
         params
       )
@@ -151,9 +69,10 @@ export class SocialDataService {
   ): Promise<SocialDataSearchResponse> {
     try {
       logger.info(`Getting comments of tweet: ${tweetId}`)
-      const data = await this.apiGet<SocialDataSearchResponse>(
+      const data = await this.apiFetch<'GET', SocialDataSearchResponse>(
+        'GET',
         `/twitter/tweets/${tweetId}/comments`,
-        cursor ? { cursor } : {}
+        cursor ? { params: { cursor } } : {}
       )
       logger.info(
         `Retrieved ${data.tweets?.length || 0} comments from Social Data API`
@@ -180,13 +99,12 @@ export class SocialDataService {
     webhookUrl: string
   ): Promise<SocialDataUserTweetsMonitorResponse> {
     try {
-      const data = await this.apiPost<SocialDataUserTweetsMonitorResponse>(
-        '/monitors/user-tweets',
-        {
-          user_screen_name: userScreenName,
-          webhook_url: webhookUrl,
-        }
-      )
+      const data = await this.apiFetch<
+        'POST',
+        SocialDataUserTweetsMonitorResponse
+      >('POST', '/monitors/user-tweets', {
+        data: { user_screen_name: userScreenName, webhook_url: webhookUrl },
+      })
       return data
     } catch (error) {
       const errorMessage =
@@ -196,6 +114,154 @@ export class SocialDataService {
         status: 'error',
         message: errorMessage,
       }
+    }
+  }
+
+  /**
+   * Get active monitors, retreiving all pages
+   * @param page Page number @default 1
+   * @returns Active monitors
+   */
+  async getActiveMonitors(
+    page: number = 1
+  ): Promise<SocialDataActiveMonitorsResponse> {
+    try {
+      const data = await this.apiFetch<'GET', SocialDataActiveMonitorsResponse>(
+        'GET',
+        `/monitors?page=${page}`
+      )
+
+      if (data.meta.page < data.meta.last_page) {
+        const nextPage = data.meta.page + 1
+        const nextPageData = await this.getActiveMonitors(nextPage)
+        return {
+          ...data,
+          data: [...data.data, ...nextPageData.data],
+        }
+      }
+
+      return data
+    } catch (error) {
+      logger.error(
+        `Error getting active monitors: ${error instanceof Error ? error.message : String(error)}`
+      )
+      return {
+        data: [],
+        meta: { page: 1, last_page: 1, items_count: 0 },
+      }
+    }
+  }
+
+  /**
+   * Delete a monitor
+   * @param id Monitor ID
+   * @returns void
+   */
+  async deleteMonitor(id: string): Promise<void> {
+    await this.apiFetch<'DELETE', void>('DELETE', `/monitors/${id}`)
+  }
+
+  /**
+   * Patch a monitor
+   * @param id Monitor ID
+   * @param data Monitor data
+   * @returns SocialDataUserTweetsMonitorResponse
+   */
+  async patchMonitor(
+    id: string,
+    data: { webhook_url: string }
+  ): Promise<SocialDataUserTweetsMonitorResponse> {
+    return await this.apiFetch<'PATCH', SocialDataUserTweetsMonitorResponse>(
+      'PATCH',
+      `/monitors/${id}`,
+      { data }
+    )
+  }
+
+  /**
+   * Dynamic fetch handler for Social Data Tools API
+   * @param method HTTP method
+   * @param endpoint API endpoint
+   * @param options Request options (params for GET, data for POST/PATCH, id for DELETE)
+   * @returns Response data based on method type
+   */
+  private async apiFetch<
+    M extends 'GET' | 'POST' | 'DELETE' | 'PATCH',
+    T = M extends 'DELETE' ? void : any,
+  >(
+    method: M,
+    endpoint: string,
+    options?: M extends 'GET'
+      ? { params?: Record<string, string> }
+      : M extends 'POST' | 'PATCH'
+        ? { data: Record<string, any> }
+        : M extends 'DELETE'
+          ? { id?: string }
+          : never
+  ): Promise<T> {
+    const baseUrl = 'https://api.socialdata.tools'
+    let url = new URL(`${baseUrl}${endpoint}`)
+
+    // Handle GET parameters
+    if (method === 'GET' && options && 'params' in options) {
+      Object.entries(options.params || {}).forEach(([key, value]) => {
+        url.searchParams.append(key, value)
+      })
+    }
+
+    logger.info(`Making ${method} API request to ${url.pathname}`)
+
+    try {
+      const requestOptions: RequestInit = {
+        method,
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+      }
+
+      // Add content-type and body for POST and PATCH requests
+      if (
+        (method === 'POST' || method === 'PATCH') &&
+        options &&
+        'data' in options
+      ) {
+        requestOptions.headers = {
+          ...requestOptions.headers,
+          'Content-Type': 'application/json',
+        }
+        requestOptions.body = JSON.stringify(options.data)
+      }
+
+      // Handle Accept header for GET requests
+      if (method === 'GET') {
+        requestOptions.headers = {
+          ...requestOptions.headers,
+          Accept: 'application/json',
+        }
+      }
+
+      const response = await fetch(url.toString(), requestOptions)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        logger.error(`Social Data API error: ${response.status} - ${errorText}`)
+        throw new Error(
+          `Social Data API error: ${response.status} - ${errorText}`
+        )
+      }
+
+      // For DELETE requests, return void
+      if (method === 'DELETE') {
+        return undefined as T
+      }
+
+      // For GET, POST and PATCH, return JSON response
+      return (await response.json()) as T
+    } catch (error) {
+      logger.error(
+        `API error: ${error instanceof Error ? error.message : String(error)}`
+      )
+      throw error
     }
   }
 }

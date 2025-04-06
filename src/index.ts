@@ -16,6 +16,7 @@ import { Jobs } from '@/jobs'
 import { TwitterService } from './twitter.service'
 import { AuthXService } from './auth.x.service'
 import { AuthEvmService } from './auth.evm.service'
+import { SocialDataService } from './socialdata.service'
 
 // ------------------------------------------------------------
 // Server
@@ -55,6 +56,7 @@ export const bucketService = new BucketService()
 export const twitterService = new TwitterService()
 export const authXService = new AuthXService(twitterService.client)
 export const authEvmService = new AuthEvmService()
+export const socialdataService = new SocialDataService()
 
 // Setup routes
 new Routes(app, isDev)
