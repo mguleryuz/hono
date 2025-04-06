@@ -1,0 +1,61 @@
+# MongoDB RAG Project Rules
+
+## Project Structure
+- Source code should be in `src/` directory
+- Tests should be in `tests/` directory
+- Keep each component in its own file
+- Follow TypeScript best practices
+
+## Code Style
+- Use TypeScript for all new code
+- Maintain consistent indentation (2 spaces)
+- Use camelCase for variables and functions
+- Use PascalCase for interfaces, types, and classes
+- Use proper TypeScript typing
+- Avoid any when possible
+- Use async/await for asynchronous operations
+- Provide JSDoc comments for public methods
+
+## MongoDB Patterns
+- Always provide proper typing for MongoDB schemas and models
+- Use mongoose's Schema.Types.ObjectId for IDs
+- Set explicit indexes in schema definitions
+- Use proper timestamps fields
+- Include TTL indexes for expiring data
+- Handle MongoDB connection states properly
+- Always close connections when finished
+
+## Vector Search Patterns
+- Remember that $vectorSearch must be first in MongoDB aggregation pipeline
+- Always handle the case where the vector index doesn't exist yet
+- Set appropriate vector dimensions for the embedding model
+- Use proper similarity metrics (cosine for text embeddings)
+- Apply post-filtering after vector search
+- Use numCandidates parameter for better recall when filtering
+
+## Error Handling
+- Provide specific error messages
+- Use try/catch blocks around database operations
+- Handle connection errors gracefully
+- Propagate meaningful errors to the caller
+- Check for null/undefined values before operating on them
+
+## Testing
+- Set NODE_ENV=test in test environments
+- Clean up test data after tests complete
+- Use isolated test databases
+- Test both positive and negative cases
+- Add specific test cases for error conditions
+
+## Documentation
+- Document all public methods
+- Provide examples for common operations
+- Include both parameter and return types
+- Document error conditions and handling
+
+## Optimization
+- Use appropriate MongoDB indexes
+- Implement pagination for large result sets
+- Use projection to limit returned fields when appropriate
+- Consider caching for frequently accessed data
+- Monitor query performance 
