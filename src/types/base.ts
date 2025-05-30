@@ -11,11 +11,5 @@ export type Auth = {
   | 'twitterUsername'
   | 'twitterDisplayName'
   | 'twitterProfileImageUrl'
+  | 'twitterRateLimits'
 >
-
-export type PaginationResult = {
-  page: number
-  limit: number
-  totalPages: number
-  totalCount: number
-}

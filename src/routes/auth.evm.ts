@@ -1,7 +1,8 @@
-import { Hono } from 'hono'
-import { authEvmService } from '..'
 import type { HTTPError } from '@/utils'
+import { Hono } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
+
+import { authEvmService } from '..'
 
 export const authEvm = (api: Hono) => {
   api.get('/auth/evm/nonce', async (c) => {

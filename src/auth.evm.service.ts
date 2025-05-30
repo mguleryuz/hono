@@ -1,14 +1,13 @@
+import { getPublicClient, HTTPError } from '@/utils'
+import type { Context } from 'hono'
+import type { RequiredDeep } from 'type-fest'
 import {
   generateSiweNonce,
   parseSiweMessage,
   type SiweMessage,
 } from 'viem/siwe'
 
-import { getPublicClient, HTTPError } from '@/utils'
 import { UserModel } from './mongo'
-
-import type { RequiredDeep } from 'type-fest'
-import type { Context } from 'hono'
 
 export class AuthEvmService {
   async nonce(c: Context) {

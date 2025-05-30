@@ -1,23 +1,29 @@
+import { logger } from '@/utils'
 import type {
+  ChangeStreamDeleteDocument,
   ChangeStreamInsertDocument,
   ChangeStreamUpdateDocument,
-  UpdateDescription,
   Document,
 } from 'mongodb'
 import type { Model } from 'mongoose'
 
 type CallbackId = string
 
-type InsertCallback<T> = (document: T & { _id: string }) => void
-type UpdateCallback<T> = (params: {
-  document: T & { _id: string }
-  updateDescription: UpdateDescription<T & { _id: string }>
-}) => void
+type InsertCallback<T> = (
+  change: ChangeStreamInsertDocument<T & { _id: string }>
+) => void
+type UpdateCallback<T> = (
+  change: ChangeStreamUpdateDocument<T & { _id: string }>
+) => void
+type DeleteCallback<T> = (
+  change: ChangeStreamDeleteDocument<T & { _id: string }>
+) => void
 
 export class ModelChangeListener<T extends Document> {
   private static instances: Map<string, ModelChangeListener<any>> = new Map()
   private onInsertCallbacks: Map<CallbackId, InsertCallback<T>> = new Map()
   private onUpdateCallbacks: Map<CallbackId, UpdateCallback<T>> = new Map()
+  private onDeleteCallbacks: Map<CallbackId, DeleteCallback<T>> = new Map()
   private watcher: ReturnType<Model<T>['watch']>
 
   private constructor(model: Model<T>) {
@@ -26,33 +32,30 @@ export class ModelChangeListener<T extends Document> {
         T,
         | ChangeStreamInsertDocument<T & { _id: string }>
         | ChangeStreamUpdateDocument<T & { _id: string }>
+        | ChangeStreamDeleteDocument<T & { _id: string }>
       >([], {
         fullDocument: 'updateLookup',
+        fullDocumentBeforeChange: 'whenAvailable',
       })
       .on('change', (change) => {
-        const { operationType, fullDocument } = change
         try {
-          switch (operationType) {
+          switch (change.operationType) {
             case 'insert':
-              if (fullDocument) {
-                this.onInsertCallbacks.forEach((callback) =>
-                  callback(fullDocument)
-                )
-              }
+              this.onInsertCallbacks.forEach((callback) => callback(change))
               break
             case 'update':
-              if (fullDocument) {
-                const { updateDescription } = change
-                this.onUpdateCallbacks.forEach((callback) =>
-                  callback({ document: fullDocument, updateDescription })
-                )
-              }
+              this.onUpdateCallbacks.forEach((callback) => callback(change))
+              break
+            case 'delete':
+              this.onDeleteCallbacks.forEach((callback) => callback(change))
               break
             default:
               break
           }
         } catch (err) {
-          console.error('@ MODEL CHANGE LISTENER', err ?? 'No Error Caught')
+          logger.error('@ MODEL CHANGE LISTENER', {
+            err: err instanceof Error ? err.message : String(err),
+          })
         }
       })
   }
@@ -69,8 +72,13 @@ export class ModelChangeListener<T extends Document> {
     if (!this.instances.has(modelName)) {
       this.instances.set(modelName, new ModelChangeListener(model))
     }
+
+    logger.info(`Returning model change listener for: ${modelName}`)
     return this.instances.get(modelName) as ModelChangeListener<T>
   }
+
+  // --------------------------------------------------------------------------
+  // INSERT
 
   addOnInsertCallback(callback: InsertCallback<T>): CallbackId {
     const id = this.generateCallbackId()
@@ -78,24 +86,41 @@ export class ModelChangeListener<T extends Document> {
     return id
   }
 
+  removeOnInsertCallback(id: CallbackId) {
+    this.onInsertCallbacks.delete(id)
+  }
+
+  // --------------------------------------------------------------------------
+  // UPDATE
+
   addOnUpdateCallback(callback: UpdateCallback<T>): CallbackId {
     const id = this.generateCallbackId()
     this.onUpdateCallbacks.set(id, callback)
     return id
   }
 
-  removeOnInsertCallback(id: CallbackId) {
-    this.onInsertCallbacks.delete(id)
-  }
-
   removeOnUpdateCallback(id: CallbackId) {
     this.onUpdateCallbacks.delete(id)
+  }
+
+  // --------------------------------------------------------------------------
+  // DELETE
+
+  addOnDeleteCallback(callback: DeleteCallback<T>): CallbackId {
+    const id = this.generateCallbackId()
+    this.onDeleteCallbacks.set(id, callback)
+    return id
+  }
+
+  removeOnDeleteCallback(id: CallbackId) {
+    this.onDeleteCallbacks.delete(id)
   }
 
   closeStream() {
     this.watcher.close()
     this.onInsertCallbacks.clear()
     this.onUpdateCallbacks.clear()
+    this.onDeleteCallbacks.clear()
   }
 
   private generateCallbackId(): CallbackId {

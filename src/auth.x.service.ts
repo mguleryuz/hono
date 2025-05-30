@@ -1,11 +1,12 @@
+import { UserModel } from '@/mongo/user.mongo'
+import type { Auth, User } from '@/types'
+import { getOrigin, HTTPError } from '@/utils'
+import { decryptToken, encryptToken } from '@/utils/server'
+import debug from 'debug'
 import type { Context } from 'hono'
 import { TwitterApi } from 'twitter-api-v2'
 
-import { UserModel } from '@/mongo/user.mongo'
-import type { Auth, User } from '@/types'
-
-import { decryptToken, encryptToken } from '@/utils/server'
-import { getOrigin, HTTPError } from '@/utils'
+const d = debug('auth.x.service')
 
 /**
  * Service handling Twitter OAuth authentication flow and user session management
@@ -19,7 +20,7 @@ export class AuthXService {
    */
   constructor(client: TwitterApi | undefined) {
     if (client) this.client = client
-    this.callbackUrl = `${getOrigin()}/api/auth/callback`
+    this.callbackUrl = `${getOrigin()}/api/auth/x/callback`
   }
 
   //=============================================================================
@@ -31,6 +32,7 @@ export class AuthXService {
    */
   generateAuthLink = () => {
     if (!this.client) {
+      d('Twitter client not initialized')
       throw new HTTPError('Twitter client not initialized', 500)
     }
 
@@ -41,6 +43,9 @@ export class AuthXService {
         'offline.access',
         'follows.read',
         'like.read',
+        'dm.write',
+        'tweet.write',
+        'like.write',
       ],
       // Request user's email if your app has permission
       // X requires special approval for email scope
@@ -60,6 +65,7 @@ export class AuthXService {
 
     // Initialize auth session if needed
     if (!c.req.session.auth) {
+      d('Auth session not initialized')
       c.req.session.auth = {} as any
     }
 
@@ -90,6 +96,7 @@ export class AuthXService {
 
     try {
       if (!this.client) {
+        d('Twitter client not initialized')
         throw new HTTPError('Twitter client not initialized', 500)
       }
 
@@ -118,6 +125,7 @@ export class AuthXService {
         twitterAccessToken: encryptToken(accessToken),
         twitterRefreshToken: encryptToken(refreshToken),
         twitterAccessTokenExpiresAt: expiresAt,
+        address: undefined,
       }
 
       // Upsert user in database - update if exists, create if new
@@ -144,6 +152,15 @@ export class AuthXService {
         twitterAccessTokenExpiresAt: expiresAt,
       }
 
+      // Set a longer session duration (30 days) instead of using Twitter's expiration time
+      // This works because we can refresh the token when needed
+      const maxAge = 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+      c.req.session.cookie.maxAge = maxAge
+
+      d(
+        `Saved user session.auth, with maxAge: ${maxAge / 1000 / 60 / 60 / 24} in days, ${c.req.session.auth}`
+      )
+
       // Redirect to homepage after successful authentication
       return c.redirect('/')
     } catch (error) {
@@ -164,8 +181,11 @@ export class AuthXService {
     const session = c.req.session
     const { auth } = session
 
+    d('Current user session.auth', auth)
+
     // Check if user is authenticated
     if (!auth.twitterUserId) {
+      d('User is not authenticated')
       throw new HTTPError('Not authenticated', 401)
     }
 
@@ -178,6 +198,7 @@ export class AuthXService {
 
     // Destroy session if token is invalid or expired
     if (!accessToken) {
+      d('Destroying session')
       c.req.session.destroy()
       throw new HTTPError('Session expired', 401)
     }
@@ -191,6 +212,10 @@ export class AuthXService {
       throw new HTTPError('User not found', 404)
     }
 
+    const twitterRateLimits = await UserModel.findById(auth.id, {
+      twitterRateLimits: 1,
+    }).lean()
+
     // Return user data from session
     return {
       id: auth.id,
@@ -200,6 +225,7 @@ export class AuthXService {
       twitterUsername: auth.twitterUsername,
       twitterDisplayName: auth.twitterDisplayName,
       twitterProfileImageUrl: auth.twitterProfileImageUrl,
+      twitterRateLimits: twitterRateLimits?.twitterRateLimits,
     }
   }
 
@@ -222,11 +248,14 @@ export class AuthXService {
     // Find user in database with token information
     const user = await UserModel.findById(
       userId,
-      'accessToken refreshToken tokenExpiresAt'
+      'twitterAccessToken twitterRefreshToken twitterAccessTokenExpiresAt'
     )
+
+    d('Got user for fresh access token', user)
 
     // Handle user not found
     if (!user) {
+      d('User not found')
       throw new HTTPError('User not found', 404)
     }
 
@@ -238,13 +267,17 @@ export class AuthXService {
     ) {
       // Return existing token if not expired
       if (!user.twitterAccessToken) {
+        d('Access token not found')
         throw new HTTPError('Access token not found', 404)
       }
+
+      d('Returning existing token')
       return decryptToken(user.twitterAccessToken)
     }
 
     // Ensure refresh token exists
     if (!user.twitterRefreshToken) {
+      d('Refresh token not found')
       throw new HTTPError('Refresh token not found', 404)
     }
 
@@ -254,6 +287,7 @@ export class AuthXService {
     // Use refresh token to get new access token
     try {
       if (!this.client) {
+        d('Twitter client not initialized')
         throw new HTTPError('Twitter client not initialized', 500)
       }
 
@@ -271,16 +305,17 @@ export class AuthXService {
 
       // Update user record with new token information
       await UserModel.findByIdAndUpdate(userId, {
-        accessToken: encryptedAccessToken,
-        refreshToken: encryptedRefreshToken,
-        tokenExpiresAt: expiresAt,
+        twitterAccessToken: encryptedAccessToken,
+        twitterRefreshToken: encryptedRefreshToken,
+        twitterAccessTokenExpiresAt: expiresAt,
       })
 
       // Return the access token
       return accessToken
     } catch (error: any) {
+      d('Failed to refresh access token', error)
       throw new HTTPError(
-        `[userId: ${userId}] Failed to refresh access token ~ errorMessage: ${error?.message ?? 'Unknown error message'}`,
+        `Error refreshing access token for user ${userId}, error: ${error?.message ?? 'Unknown error message'}`,
         500
       )
     }

@@ -1,6 +1,7 @@
 import type { HTTPError } from '@/utils'
 import { Hono } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
+
 import { authXService } from '..'
 
 export const authX = (api: Hono) => {

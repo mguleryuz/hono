@@ -1,4 +1,5 @@
-import { Schema, model } from 'mongoose'
+import { model, Schema } from 'mongoose'
+import type { TwitterRateLimit as TwitterApiRateLimit } from 'twitter-api-v2'
 
 // ----------------------------------------------------------------------------
 // ROLE
@@ -25,8 +26,19 @@ export type ApiSecret = {
 // ----------------------------------------------------------------------------
 // USER
 
+// Extend the official TwitterRateLimit type with our context fields
+export interface TwitterRateLimitWithContext extends TwitterApiRateLimit {
+  // Context fields for our application
+  endpoint: string
+  method: string
+  lastUpdated: Date
+}
+
 export type User = {
   role: UserRole
+
+  // CONFIGS
+  initialAgentSetupPerformed: boolean
 
   // EVM
   address?: string
@@ -39,6 +51,7 @@ export type User = {
   twitterUsername?: string
   twitterDisplayName?: string
   twitterProfileImageUrl?: string
+  twitterRateLimits?: TwitterRateLimitWithContext[]
 
   // Infra
   apiSecrets: ApiSecret[]
@@ -68,12 +81,64 @@ export const ApiSecretSchema = new Schema<ApiSecret>(
   }
 )
 
+// Schema for the SingleTwitterRateLimit structure (used in main and day limits)
+const SingleTwitterRateLimitSchema = {
+  limit: {
+    type: Number,
+    required: true,
+  },
+  remaining: {
+    type: Number,
+    required: true,
+  },
+  reset: {
+    type: Number, // Unix timestamp in seconds
+    required: true,
+  },
+}
+
+export const TwitterRateLimitSchema = new Schema<TwitterRateLimitWithContext>(
+  {
+    // Standard rate limit fields (SingleTwitterRateLimit)
+    ...SingleTwitterRateLimitSchema,
+
+    // Day limit fields (nested SingleTwitterRateLimit)
+    day: {
+      type: SingleTwitterRateLimitSchema,
+      required: false,
+    },
+
+    // Context fields
+    endpoint: {
+      type: String,
+      required: true,
+    },
+    method: {
+      type: String,
+      required: true,
+    },
+    lastUpdated: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    _id: false,
+  }
+)
+
 export const UserSchema = new Schema<User>(
   {
     role: {
       type: String,
       default: 'USER',
       enum: EUserRole,
+    },
+
+    // CONFIGS
+    initialAgentSetupPerformed: {
+      type: Boolean,
+      default: false,
     },
 
     // EVM
@@ -106,6 +171,10 @@ export const UserSchema = new Schema<User>(
     },
     twitterProfileImageUrl: {
       type: String,
+    },
+    twitterRateLimits: {
+      type: [TwitterRateLimitSchema],
+      default: [],
     },
 
     // Infra

@@ -1,4 +1,4 @@
-import { JobScheduleModel, type JobType } from '@/mongo'
+import { JobScheduleModel } from '@/mongo'
 import { Cron, scheduledJobs } from 'croner'
 
 /** Configuration for a scheduled job */
@@ -6,7 +6,7 @@ export type JobConfig = {
   /** Cron schedule string. If not provided, will attempt to load from database */
   schedule?: string
   /** Unique identifier for the job type */
-  type: JobType
+  name: string
   /** Async function to execute when job runs */
   task: () => Promise<void | null> | null | void
 }
@@ -36,49 +36,49 @@ export class JobManager {
    * @throws Error if schedule is missing or invalid
    */
   public async startJob({
-    type,
+    name,
     schedule: initialSchedule = '0 */12 * * *',
     task,
   }: JobConfig): Promise<Cron> {
     // Find existing job
-    const job = this.findJob(type)
+    const job = this.findJob(name)
 
     // Stop existing job if it's running
     if (!!job && job.isRunning()) {
-      console.log(`Stopping job "${type}"`)
+      console.log(`Stopping job "${name}"`)
       job.stop()
     }
 
     // Get schedule from database or use initial schedule
-    const schedule = (await this.getSavedSchedule(type)) ?? initialSchedule
+    const schedule = (await this.getSavedSchedule(name)) ?? initialSchedule
 
     // Validate schedule
     if (!schedule) {
-      throw new Error(`No schedule found for job "${type}"`)
+      throw new Error(`No schedule found for job "${name}"`)
     }
     if (!this.validateSchedule(schedule)) {
-      throw new Error(`Invalid schedule format "${schedule}" for job "${type}"`)
+      throw new Error(`Invalid schedule format "${schedule}" for job "${name}"`)
     }
 
     // Create new cron job
-    console.log(`Starting job "${type}" with schedule "${schedule}"`)
+    console.log(`Starting job "${name}" with schedule "${schedule}"`)
     const cronJob = new Cron(
       schedule,
       {
-        name: type,
+        name,
         timezone: 'UTC',
         protect: true,
         maxRuns: Infinity,
         catch: (error) => {
-          console.error(`Error in job "${type}":`, error)
+          console.error(`Error in job "${name}":`, error)
         },
       },
       async () => {
         try {
           await task()
-          console.log(`Job "${type}" completed successfully`)
+          console.log(`Job "${name}" completed successfully`)
         } catch (error) {
-          console.error(`Job "${type}" failed:`, error)
+          console.error(`Job "${name}" failed:`, error)
         }
       }
     )
@@ -204,9 +204,9 @@ export class JobManager {
    * @param jobType - Type of job to look up
    * @returns Saved schedule string if found, null otherwise
    */
-  private async getSavedSchedule(jobType: JobType): Promise<string | null> {
+  private async getSavedSchedule(jobName: string): Promise<string | null> {
     const jobSchedule = await JobScheduleModel.findOne({
-      jobType,
+      name: jobName,
     })
 
     return jobSchedule?.schedule ?? null

@@ -4,8 +4,8 @@
  *
  */
 
-import { Cron } from 'croner'
 import { JobManager } from '@/mongo'
+import { Cron } from 'croner'
 
 const managerInstance = JobManager.getInstance()
 
@@ -18,7 +18,7 @@ export class Jobs {
     // Or use the JobManager instance
     // ( this instance enables you to update the schedule of the job, via a api call )
     managerInstance.startJob({
-      type: 'EXEMPLE_JOB',
+      name: 'EXEMPLE_JOB',
       schedule: '0 * * * *',
       task: () => {
         console.log('Hello, world!')
