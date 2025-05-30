@@ -1,3 +1,3 @@
 export type * from '@/mongo'
-export * from './base'
+export * from './auth'
 export * from './socialdata'

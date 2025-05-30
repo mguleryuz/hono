@@ -10,9 +10,14 @@ export interface SocialDataNewTweetEvent {
 }
 
 export interface SocialDataTweet {
+  /**
+   * Twitter's ISO 8601 format with microseconds: YYYY-MM-DDTHH:mm:ss.SSSSSSZ
+   */
   tweet_created_at: string
   id: number
   id_str: string
+  community_id_str: string | null
+  community_name: string | null
   conversation_id_str: string | null
   text: string | null
   full_text: string
@@ -36,8 +41,103 @@ export interface SocialDataTweet {
   views_count: number | null
   bookmark_count: number
   lang: string
-  entities: any
+  entities: SocialDataTweetEntities
   is_pinned: boolean
+}
+
+export interface SocialDataMedia {
+  display_url: string
+  expanded_url: string
+  id_str: string
+  indices: Array<number>
+  media_key: string
+  media_url_https: string
+  type: string
+  url: string
+  ext_media_availability: {
+    status: string
+  }
+  features: {
+    large: {
+      faces: Array<{
+        x: number
+        y: number
+        h: number
+        w: number
+      }>
+    }
+    medium: {
+      faces: Array<{
+        x: number
+        y: number
+        h: number
+        w: number
+      }>
+    }
+    small: {
+      faces: Array<{
+        x: number
+        y: number
+        h: number
+        w: number
+      }>
+    }
+    orig: {
+      faces: Array<{
+        x: number
+        y: number
+        h: number
+        w: number
+      }>
+    }
+  }
+  sizes: {
+    large: {
+      h: number
+      w: number
+      resize: string
+    }
+    medium: {
+      h: number
+      w: number
+      resize: string
+    }
+    small: {
+      h: number
+      w: number
+      resize: string
+    }
+    thumb: {
+      h: number
+      w: number
+      resize: string
+    }
+  }
+  original_info: {
+    height: number
+    width: number
+    focus_rects: Array<{
+      x: number
+      y: number
+      w: number
+      h: number
+    }>
+  }
+}
+
+export interface SocialDataUserMention {
+  id_str: string
+  name: string
+  screen_name: string
+  indices: Array<number>
+}
+
+export interface SocialDataTweetEntities {
+  media?: SocialDataMedia[]
+  user_mentions: SocialDataUserMention[]
+  urls: Array<any>
+  hashtags: Array<any>
+  symbols: Array<any>
 }
 
 export interface SocialDataUser {
@@ -122,8 +222,8 @@ export type TwitterSearchQuery = {
   quotedUserId?: string
 
   // Date & Time filters
-  since?: string
-  until?: string
+  since?: Date
+  until?: Date
   sinceTime?: number
   untilTime?: number
   sinceId?: string
