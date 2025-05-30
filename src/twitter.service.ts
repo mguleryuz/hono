@@ -1,91 +1,173 @@
+import { TwitterRateLimitMongoStore } from '@/mongo/helpers'
+import { getXClientId, getXClientSecret, logger } from '@/utils'
+import { TwitterApiRateLimitPlugin } from '@twitter-api-v2/plugin-rate-limit'
+import { CacheContainer } from 'node-ts-cache'
+import { MemoryStorage } from 'node-ts-cache-storage-memory'
 import { TwitterApi } from 'twitter-api-v2'
-import {
-  getTwitterAccessSecret,
-  getTwitterAccessToken,
-  getTwitterApiKey,
-  getTwitterApiSecret,
-  getXClientId,
-  getXClientSecret,
-  logger,
-} from '@/utils'
+
 import { authXService } from '.'
 import type { User } from './types'
 
+// Simple rate limit response used throughout the app
+export interface RateLimitInfo {
+  limitReached: boolean
+  resetTime?: Date
+  remaining?: number
+  limit?: number
+  endpoint?: string
+}
+
 export class TwitterService {
   private readonly _client: TwitterApi | undefined
-  private readonly _userClient: TwitterApi | undefined
+  private _userClientsCache: CacheContainer
+  private _rateLimitPlugin: TwitterApiRateLimitPlugin
+  private _rateLimitStore: TwitterRateLimitMongoStore
 
   constructor() {
     const clientId = getXClientId()
     const clientSecret = getXClientSecret()
-    const accessToken = getTwitterAccessToken()
-    const accessSecret = getTwitterAccessSecret()
-    const appKey = getTwitterApiKey()
-    const appSecret = getTwitterApiSecret()
+
+    // Initialize rate limit store and plugin
+    this._rateLimitStore = new TwitterRateLimitMongoStore()
+    this._rateLimitPlugin = new TwitterApiRateLimitPlugin(this._rateLimitStore)
 
     if (clientId && clientSecret) {
-      this._client = new TwitterApi({ clientId, clientSecret })
+      this._client = new TwitterApi(
+        { clientId, clientSecret },
+        { plugins: [this._rateLimitPlugin] }
+      )
     }
 
-    if (appKey && appSecret && accessToken && accessSecret) {
-      this._userClient = new TwitterApi({
-        appKey,
-        appSecret,
-        accessToken,
-        accessSecret,
-      })
-    }
+    this._userClientsCache = new CacheContainer(new MemoryStorage())
   }
 
   get client() {
     return this._client
   }
 
-  get userClient() {
-    return this._userClient
+  getRateLimitPlugin(userId: string) {
+    this._rateLimitStore.setCurrentUserId(userId)
+    return this._rateLimitPlugin
   }
 
+  get rateLimitStore() {
+    return this._rateLimitStore
+  }
+
+  /**
+   * Creates an authenticated Twitter client for a user
+   */
   async createAuthenticatedClient(
-    user: User & { id: string }
+    user: User & { id: string },
+    validateToken: boolean = false
   ): Promise<TwitterApi | null> {
     try {
-      const accessToken = await authXService.getAccessToken(user.id)
+      // Check cache first
+      const cachedClient = await this._userClientsCache.getItem<TwitterApi>(
+        user.id
+      )
 
-      if (!accessToken) {
-        logger.error(`Invalid access token for user ${user.twitterUsername}`)
-        return null
+      if (cachedClient) {
+        logger.info(`Returning cached client for user ${user.twitterUsername}`)
+        return cachedClient
       }
 
-      const userTwitterClient = new TwitterApi(accessToken)
-      const meResult = await userTwitterClient.v2.me()
-      logger.info(`Successfully authenticated as: ${meResult.data.username}`)
-
-      return userTwitterClient
+      // Get fresh token and create client
+      return await this.initializeUserClient(user, validateToken)
     } catch (error: any) {
-      handleTwitterApiError(error, user.twitterUserId, 'Client authentication')
+      logger.error(
+        `[AUTH ERROR] Error during client authentication: ${error instanceof Error ? error.message : String(error)}`
+      )
       return null
     }
   }
-}
 
-export function handleTwitterApiError(
-  error: any,
-  userId: string | undefined,
-  operation: string
-): void {
-  logger.error(`${operation} failed: ${error.message}`)
+  /**
+   * Attempt to refresh authentication for a user
+   * Call this when encountering 401 errors
+   */
+  async refreshAuthentication(userId: string): Promise<boolean> {
+    try {
+      logger.info(
+        `[AUTH REFRESH] Attempting to refresh authentication for user ${userId}`
+      )
 
-  if (error.code === 401 || error.status === 401) {
-    logger.error('User token unauthorized or expired')
-  } else if (error.code === 429 || error.status === 429) {
-    logger.error(`Rate limit exceeded for user ID ${userId}`)
-    if (error.rateLimit?.reset) {
-      const resetTime = new Date(Number(error.rateLimit.reset) * 1000)
-      logger.info(`Rate limit resets at: ${resetTime.toISOString()}`)
+      // Clear any cached clients
+      try {
+        await this._userClientsCache.setItem(userId, null, {
+          ttl: 0,
+        })
+      } catch {
+        // Ignore cache clearing errors
+      }
+
+      // Attempt to get a fresh token
+      const freshToken = await authXService.getAccessToken(userId)
+
+      if (freshToken) {
+        logger.info(
+          `[AUTH REFRESH] Successfully refreshed authentication for user ${userId}`
+        )
+        return true
+      } else {
+        logger.error(
+          `[AUTH REFRESH] Failed to refresh authentication for user ${userId}`
+        )
+        return false
+      }
+    } catch (error) {
+      logger.error(
+        `[AUTH REFRESH] Error during authentication refresh: ${error instanceof Error ? error.message : String(error)}`
+      )
+      return false
     }
-  } else if (error.code === 400 || error.status === 400) {
-    logger.error(`Bad request error: ${error.data?.message || error.message}`)
-    logger.error('This may be due to an invalid token format or missing scopes')
+  }
+
+  /**
+   * Initialize a new Twitter client for a user
+   */
+  private async initializeUserClient(
+    user: User & { id: string },
+    validateToken: boolean = false
+  ): Promise<TwitterApi | null> {
+    const accessToken = await authXService.getAccessToken(user.id)
+
+    if (!accessToken) {
+      logger.error(
+        `[AUTH ERROR] Invalid or missing access token for user ${user.twitterUsername || user.id}`
+      )
+      return null
+    }
+
+    // Set the current user ID on the rate limit store
+    this._rateLimitStore.setCurrentUserId(user.id)
+
+    // Create client with rate limit plugin
+    const userTwitterClient = new TwitterApi(accessToken, {
+      plugins: [this._rateLimitPlugin],
+    })
+
+    try {
+      if (validateToken) {
+        const meResult = await userTwitterClient.v2.me()
+        logger.info(`Successfully authenticated as: ${meResult.data.username}`)
+      } else {
+        logger.info(
+          `Created Twitter client for user ${user.twitterUsername} without validation`
+        )
+      }
+
+      await this._userClientsCache.setItem(user.id, userTwitterClient, {
+        ttl: 60 * 60 * 1, // 1 hours
+      })
+
+      return userTwitterClient
+    } catch (error: any) {
+      logger.error(
+        `[AUTH ERROR] Error during client authentication: ${error instanceof Error ? error.message : String(error)}`
+      )
+      return null
+    }
   }
 }
 
@@ -101,4 +183,13 @@ export function formatTwitterDateString(date: Date): string {
   const seconds = String(date.getUTCSeconds()).padStart(2, '0')
 
   return `${year}-${month}-${day}_${hours}:${minutes}:${seconds}_UTC`
+}
+
+/**
+ * Checks if a message has text content besides links and usernames
+ */
+export function hasTextContent(text: string): boolean {
+  // Remove links and @<username>
+  const cleanedText = text.replace(/https?:\/\/[^\s]+|@[^\s]+/g, '')
+  return cleanedText.trim().length > 0
 }

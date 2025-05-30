@@ -1,7 +1,10 @@
 import { getSocialDataToolsApiKey, logger } from '@/utils'
+
+import { formatTwitterDateString } from './twitter.service'
 import type {
   SocialDataActiveMonitorsResponse,
   SocialDataSearchResponse,
+  SocialDataTweet,
   SocialDataUserTweetsMonitorResponse,
   TwitterSearchQuery,
 } from './types'
@@ -59,6 +62,27 @@ export class SocialDataService {
   }
 
   /**
+   * Get a tweet by ID
+   */
+  async getTweetById(tweetId: string): Promise<SocialDataTweet | null> {
+    try {
+      const data = await this.apiFetch<'GET', SocialDataTweet>(
+        'GET',
+        `/twitter/tweets/${tweetId}`
+      )
+      logger.info(
+        `Retrieved tweet by username: ${data.user.screen_name}, start of tweet: ${data.full_text.slice(0, 50)}`
+      )
+      return data
+    } catch (error) {
+      logger.error(
+        `Error getting tweet by ID: ${error instanceof Error ? error.message : String(error)}`
+      )
+      return null
+    }
+  }
+
+  /**
    * Get comments of a tweet
    * @param tweetId Tweet ID
    * @returns Comments
@@ -105,6 +129,15 @@ export class SocialDataService {
       >('POST', '/monitors/user-tweets', {
         data: { user_screen_name: userScreenName, webhook_url: webhookUrl },
       })
+
+      type SuccessResponse = Extract<
+        SocialDataUserTweetsMonitorResponse,
+        { status: 'success' }
+      >
+
+      logger.info(
+        `Created user tweets monitor: username ${(data as SuccessResponse).data.parameters.user_screen_name}, monitor id ${(data as SuccessResponse).data.id}`
+      )
       return data
     } catch (error) {
       const errorMessage =
@@ -159,6 +192,8 @@ export class SocialDataService {
    */
   async deleteMonitor(id: string): Promise<void> {
     await this.apiFetch<'DELETE', void>('DELETE', `/monitors/${id}`)
+    logger.info(`Deleted monitor: ${id}`)
+    return
   }
 
   /**
@@ -171,11 +206,13 @@ export class SocialDataService {
     id: string,
     data: { webhook_url: string }
   ): Promise<SocialDataUserTweetsMonitorResponse> {
-    return await this.apiFetch<'PATCH', SocialDataUserTweetsMonitorResponse>(
+    const response = await this.apiFetch<
       'PATCH',
-      `/monitors/${id}`,
-      { data }
-    )
+      SocialDataUserTweetsMonitorResponse
+    >('PATCH', `/monitors/${id}`, { data })
+
+    logger.info(`Patched monitor: ${id}`)
+    return response
   }
 
   /**
@@ -336,11 +373,11 @@ export function buildTwitterSearchQuery(query: TwitterSearchQuery): string {
 
   // Date & Time filters
   if (query.since) {
-    parts.push(`since:${query.since}`)
+    parts.push(`since:${formatTwitterDateString(query.since)}`)
   }
 
   if (query.until) {
-    parts.push(`until:${query.until}`)
+    parts.push(`until:${formatTwitterDateString(query.until)}`)
   }
 
   if (query.sinceTime) {
