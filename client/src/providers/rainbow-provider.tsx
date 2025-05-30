@@ -1,14 +1,14 @@
 'use client'
 
 // Third-party dependencies
+import { getAuthMethod } from '@/utils/env'
+import { useEvmAuth } from '@c/hooks'
 import {
   createAuthenticationAdapter,
   RainbowKitAuthenticationProvider,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit'
-import { getAuthMethod } from '@/utils/env'
 import { createSiweMessage } from 'viem/siwe'
-import { useEvmAuth } from '@c/hooks'
 
 import '@rainbow-me/rainbowkit/styles.css'
 
@@ -90,36 +90,36 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
             modalMobile: 'var(--radius)',
           },
           colors: {
-            accentColor: 'hsl(var(--accent))',
-            accentColorForeground: 'hsl(var(--accent-foreground))',
-            actionButtonBorder: 'hsl(var(--border))',
-            actionButtonBorderMobile: 'hsl(var(--border))',
-            actionButtonSecondaryBackground: 'hsl(var(--muted))',
-            closeButton: 'hsl(var(--muted-foreground))',
-            closeButtonBackground: 'hsl(var(--muted))',
-            connectButtonBackground: 'hsl(var(--primary))',
-            connectButtonBackgroundError: 'hsl(var(--destructive))',
-            connectButtonInnerBackground: 'hsl(var(--background))',
-            connectButtonText: 'hsl(var(--primary-foreground))',
-            connectButtonTextError: 'hsl(var(--destructive-foreground))',
-            connectionIndicator: 'hsl(var(--secondary))',
-            downloadBottomCardBackground: 'hsl(var(--card))',
-            downloadTopCardBackground: 'hsl(var(--background))',
-            error: 'hsl(var(--destructive))',
-            generalBorder: 'hsl(var(--border))',
-            generalBorderDim: 'hsl(var(--border))',
-            menuItemBackground: 'hsl(var(--background))',
-            modalBackdrop: 'hsl(var(--background))',
-            modalBackground: 'hsl(var(--background))',
-            modalBorder: 'hsl(var(--border))',
-            modalText: 'hsl(var(--foreground))',
-            modalTextDim: 'hsl(var(--muted-foreground))',
-            modalTextSecondary: 'hsl(var(--muted-foreground))',
-            profileAction: 'hsl(var(--muted))',
-            profileActionHover: 'hsl(var(--muted))',
-            profileForeground: 'hsl(var(--background))',
-            selectedOptionBorder: 'hsl(var(--accent))',
-            standby: 'hsl(var(--secondary))',
+            accentColor: 'var(--link)',
+            accentColorForeground: 'var(--accent-foreground)',
+            actionButtonBorder: 'var(--border)',
+            actionButtonBorderMobile: 'var(--border)',
+            actionButtonSecondaryBackground: 'var(--muted)',
+            closeButton: 'var(--secondary-foreground)',
+            closeButtonBackground: 'var(--secondary)',
+            connectButtonBackground: 'var(--primary)',
+            connectButtonBackgroundError: 'var(--destructive)',
+            connectButtonInnerBackground: 'var(--background)',
+            connectButtonText: 'var(--primary-foreground)',
+            connectButtonTextError: 'var(--destructive-foreground)',
+            connectionIndicator: 'var(--secondary)',
+            downloadBottomCardBackground: 'var(--card)',
+            downloadTopCardBackground: 'var(--background)',
+            error: 'var(--destructive)',
+            generalBorder: 'var(--border)',
+            generalBorderDim: 'var(--border)',
+            menuItemBackground: 'var(--background)',
+            modalBackdrop: 'var(--background)',
+            modalBackground: 'var(--background)',
+            modalBorder: 'var(--border)',
+            modalText: 'var(--foreground)',
+            modalTextDim: 'var(--muted)',
+            modalTextSecondary: 'var(--muted)',
+            profileAction: 'var(--secondary)',
+            profileActionHover: 'var(--secondary-hover)',
+            profileForeground: 'var(--background)',
+            selectedOptionBorder: 'var(--accent)',
+            standby: 'var(--secondary)',
           },
         }}
       >

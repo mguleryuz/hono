@@ -6,7 +6,3 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
-
-.shadow-global {
-  @apply shadow-base-content/20 shadow-[-8px_8px_0px_1px];
-}

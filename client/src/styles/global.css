@@ -1,11 +1,10 @@
 @import 'tailwindcss';
-@plugin 'fluid-tailwind';
+@import 'tw-animate-css';
 
-@import './utilities.css';
 @import './theme.css';
+@import './utilities.css';
+@import './json-view.css';
 @import './typography.css';
-
-@custom-variant dark (&:is(.dark *));
 
 @font-face {
   font-family: 'Archivo';
@@ -48,7 +47,6 @@ body,
   height: 100%; /* Make sure it grows to fill the available space */
   min-height: 0; /* Important to avoid unwanted overflow in grid children */
   overflow-y: auto; /* Scroll only within the children */
-  @apply scrollbar-none; /* Custom Tailwind scrollbar styles */
 }
 
 .children-content {
@@ -61,6 +59,8 @@ body,
 .page {
   @apply flex w-full max-w-screen-lg flex-col gap-6 self-center;
 }
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -131,4 +131,26 @@ body,
   body {
     @apply bg-background text-foreground;
   }
+}
+
+:root {
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }

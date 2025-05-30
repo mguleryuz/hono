@@ -54,7 +54,7 @@ export function Spinner({
 }: SpinnerContentProps) {
   const Loader = loaders[loader]
   return (
-    <span className={spinnerVariants({ show })}>
+    <span data-slot="spinner" className={spinnerVariants({ show })}>
       <Loader className={cn(loaderVariants({ size }), className)} />
       {children}
     </span>

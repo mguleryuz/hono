@@ -1,12 +1,11 @@
 import * as React from 'react'
-import { Slot } from '@radix-ui/react-slot'
-import { cva } from 'class-variance-authority'
-import type { VariantProps } from 'class-variance-authority'
+import { loaders } from '@c/components/ui/spinner'
 import { cn } from '@c/utils'
-import { loaders } from './spinner'
+import { Slot } from '@radix-ui/react-slot'
+import { cva, type VariantProps } from 'class-variance-authority'
 
 const buttonVariants = cva(
-  'animate-pop active:scale-95 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'animate-pop active:scale-95 cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -35,75 +34,76 @@ const buttonVariants = cva(
   }
 )
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  loading?: boolean
-  startIcon?: React.ReactNode
-  endIcon?: React.ReactNode
-  loader?: keyof typeof loaders
-}
+export type ButtonProps = React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+    startIcon?: React.ReactNode
+    endIcon?: React.ReactNode
+    loading?: boolean
+    loader?: 'Loader' | 'Loader2' | 'PinWheel' | 'Lucide' | 'Icon'
+  }
 
-const Button = ({
-  ref,
+function Button({
   className,
   variant,
   size,
   asChild = false,
-  loading,
   startIcon,
   endIcon,
-  children,
+  loading,
   loader = 'PinWheel',
+  children,
   ...props
-}: ButtonProps & { ref?: React.RefObject<HTMLButtonElement | null> }) => {
+}: ButtonProps) {
   const Comp = asChild ? Slot : 'button'
   const Loader = loaders[loader]
 
-  let finalChildren = children
+  const renderContent = () => {
+    const hasChildren = !!children
+    const content: React.ReactNode[] = []
 
-  if (startIcon || loading || endIcon) {
-    const elements: React.ReactNode[] = []
     if (startIcon) {
-      elements.push(
-        <span key="start-icon" className={cn(!!children && 'mr-2')}>
+      content.push(
+        <span key="start-icon" className={cn(hasChildren && 'mr-2')}>
           {startIcon}
         </span>
       )
     }
+
     if (loading) {
-      elements.push(
+      content.push(
         <Loader
           key="loader"
-          className={cn('h-4 w-4 animate-spin', !!children && 'mr-2')}
+          className={cn('h-4 w-4 animate-spin', hasChildren && 'mr-2')}
         />
       )
     }
-    if (children) {
-      elements.push(<React.Fragment key="children">{children}</React.Fragment>)
+
+    if (hasChildren) {
+      content.push(<React.Fragment key="children">{children}</React.Fragment>)
     }
+
     if (endIcon) {
-      elements.push(
-        <span key="end-icon" className={cn(!!children && 'ml-2')}>
+      content.push(
+        <span key="end-icon" className={cn(hasChildren && 'ml-2')}>
           {endIcon}
         </span>
       )
     }
-    finalChildren = elements
+
+    return content.length > 0 ? content : children
   }
 
   return (
     <Comp
-      className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
+      data-slot="button"
       disabled={loading}
+      className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     >
-      {finalChildren}
+      {renderContent()}
     </Comp>
   )
 }
-Button.displayName = 'Button'
 
 export { Button, buttonVariants }

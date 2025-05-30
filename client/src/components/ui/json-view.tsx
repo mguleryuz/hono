@@ -1,23 +1,34 @@
 'use client'
 
-import { cn } from '@c/utils'
-
 import * as React from 'react'
+import { cn } from '@c/utils'
 import {
-  JsonView as JsonViewOrg,
   allExpanded,
   defaultStyles,
+  JsonView as JsonViewOrg,
 } from 'react-json-view-lite'
+
+type anyArray = (
+  | object
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | bigint
+  | symbol
+  | anyArray
+)[]
 
 export const JsonView = ({
   json,
   className,
 }: {
-  json: any
+  json: object | anyArray
   className?: string
 }) => {
   return (
-    <div className={cn(className, 'rounded-sm')}>
+    <div className={cn(className, 'in--rounded-sm')}>
       <JsonViewOrg
         data={json}
         shouldExpandNode={allExpanded}

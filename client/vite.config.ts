@@ -1,8 +1,8 @@
-import { defineConfig, loadEnv } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
+import tailwindcss from '@tailwindcss/vite'
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig, loadEnv } from 'vite'
 
 // https://vitejs.dev/config/
 export default ({ mode }: { mode: string }) => {
@@ -24,7 +24,7 @@ export default ({ mode }: { mode: string }) => {
     define: {
       'process.env': process.env,
     },
-    plugins: [TanStackRouterVite({}), react(), tailwindcss()],
+    plugins: [tailwindcss(), TanStackRouterVite({}), react()],
     resolve: {
       alias: {
         '@': serverPath,
