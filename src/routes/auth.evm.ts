@@ -4,57 +4,45 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import { authEvmService } from '..'
 
-export const authEvm = (api: Hono) => {
-  api.get('/auth/evm/nonce', async (c) => {
-    try {
-      const nonce = await authEvmService.nonce(c)
-      return c.text(nonce)
-    } catch (error: unknown) {
-      const e = error as HTTPError
+export const authEvm = new Hono()
 
-      return c.json(
-        { message: e.message },
-        e.statusCode as ContentfulStatusCode
-      )
-    }
-  })
+authEvm.get('/nonce', async (c) => {
+  try {
+    const nonce = await authEvmService.nonce(c)
+    return c.text(nonce)
+  } catch (error: unknown) {
+    const e = error as HTTPError
 
-  api.post('/auth/evm/verify', async (c) => {
-    try {
-      const result = await authEvmService.verify(c)
-      return c.json(result)
-    } catch (error: unknown) {
-      const e = error as HTTPError
-      return c.json(
-        { message: e.message },
-        e.statusCode as ContentfulStatusCode
-      )
-    }
-  })
+    return c.json({ message: e.message }, e.statusCode as ContentfulStatusCode)
+  }
+})
 
-  api.get('/auth/evm/session', async (c) => {
-    try {
-      const result = await authEvmService.session(c)
-      return c.json(result)
-    } catch (error: unknown) {
-      const e = error as HTTPError
-      return c.json(
-        { message: e.message },
-        e.statusCode as ContentfulStatusCode
-      )
-    }
-  })
+authEvm.post('/verify', async (c) => {
+  try {
+    const result = await authEvmService.verify(c)
+    return c.json(result)
+  } catch (error: unknown) {
+    const e = error as HTTPError
+    return c.json({ message: e.message }, e.statusCode as ContentfulStatusCode)
+  }
+})
 
-  api.get('/auth/evm/signout', async (c) => {
-    try {
-      const result = await authEvmService.signout(c)
-      return c.json(result)
-    } catch (error: unknown) {
-      const e = error as HTTPError
-      return c.json(
-        { message: e.message },
-        e.statusCode as ContentfulStatusCode
-      )
-    }
-  })
-}
+authEvm.get('/session', async (c) => {
+  try {
+    const result = await authEvmService.session(c)
+    return c.json(result)
+  } catch (error: unknown) {
+    const e = error as HTTPError
+    return c.json({ message: e.message }, e.statusCode as ContentfulStatusCode)
+  }
+})
+
+authEvm.get('/signout', async (c) => {
+  try {
+    const result = await authEvmService.signout(c)
+    return c.json(result)
+  } catch (error: unknown) {
+    const e = error as HTTPError
+    return c.json({ message: e.message }, e.statusCode as ContentfulStatusCode)
+  }
+})

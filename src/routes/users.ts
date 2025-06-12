@@ -10,20 +10,20 @@ export type UsersReturnType = Pick<
   | 'twitterDisplayName'
 >[]
 
-export const users = (api: Hono) => {
-  api.get('/users', async (c) => {
-    try {
-      const users = await UserModel.find()
-        .sort({ points: -1 })
-        .select(
-          'address twitterUsername twitterDisplayName twitterProfileImageUrl'
-        )
-        .lean()
+export const users = new Hono()
 
-      return c.json(users)
-    } catch (error) {
-      logger.error('Error getting all users', error)
-      return c.json([], 500)
-    }
-  })
-}
+users.get('/users', async (c) => {
+  try {
+    const users = await UserModel.find()
+      .sort({ points: -1 })
+      .select(
+        'address twitterUsername twitterDisplayName twitterProfileImageUrl'
+      )
+      .lean()
+
+    return c.json(users)
+  } catch (error) {
+    logger.error('Error getting all users', error)
+    return c.json([], 500)
+  }
+})

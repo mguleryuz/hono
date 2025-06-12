@@ -106,6 +106,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.5",
     "lint-staged": "^15.2.10",
+    "mongodb-memory-server": "^10.1.4",
     "postcss": "^8.5.4",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "standard-version": "^9.5.0",

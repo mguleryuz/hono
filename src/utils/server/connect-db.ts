@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+
 import { getMongoUri } from '../env'
 
 // Connection state tracking
@@ -6,6 +7,12 @@ let isConnected = false
 let retryCount = 0
 const MAX_RETRIES = 5
 const INITIAL_BACKOFF_MS = 1000
+
+// Memory server instance for development
+let mongoMemoryServer: any = null
+
+// Environment check
+const isDevelopment = process.env.NODE_ENV === 'development'
 
 export async function connectDb() {
   try {
@@ -15,14 +22,39 @@ export async function connectDb() {
       return
     }
 
-    const MONGO_URI = getMongoUri()
+    let MONGO_URI: string
 
-    // Check if URI exists
-    if (!MONGO_URI) {
-      throw new Error('MongoDB URI is not defined in environment variables')
+    if (isDevelopment) {
+      const { MongoMemoryServer } = await import('mongodb-memory-server')
+      // Use MongoDB Memory Server for development
+      console.log('🚀 Starting MongoDB Memory Server for development...')
+
+      if (!mongoMemoryServer) {
+        mongoMemoryServer = await MongoMemoryServer.create({
+          instance: {
+            dbName: 'moai-dev',
+          },
+        })
+      }
+
+      MONGO_URI = mongoMemoryServer.getUri()
+      console.log('✅ MongoDB Memory Server started at:', MONGO_URI)
+    } else {
+      // Use regular MongoDB URI for production
+      const mongoUri = getMongoUri()
+
+      // Check if URI exists - in development, we might not have it set
+      if (!mongoUri && !isDevelopment) {
+        throw new Error('MongoDB URI is not defined in environment variables')
+      }
+
+      // Fallback to default if no URI in development
+      MONGO_URI = mongoUri || 'mongodb://localhost:27017/moai'
     }
 
-    console.log('🔄 Connecting to MongoDB...')
+    console.log(
+      `🔄 Connecting to MongoDB${isDevelopment ? ' Memory Server' : ''}...`
+    )
 
     // Set up mongoose connection options
     mongoose.connection.on('connected', () => {
@@ -121,5 +153,12 @@ export async function closeDbConnection() {
     await mongoose.connection.close()
     console.log('✅ Database connection closed gracefully')
     isConnected = false
+  }
+
+  // Stop memory server if it's running
+  if (mongoMemoryServer) {
+    await mongoMemoryServer.stop()
+    mongoMemoryServer = null
+    console.log('✅ MongoDB Memory Server stopped')
   }
 }

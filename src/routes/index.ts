@@ -1,9 +1,10 @@
+import { serveClientHtml } from '@/utils/server'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
-import { serveClientHtml } from '@/utils/server'
-import { users } from './users'
-import { authX } from './auth.x'
+
 import { authEvm } from './auth.evm'
+import { authX } from './auth.x'
+import { users } from './users'
 
 export class Routes {
   constructor(app: Hono, isDev: boolean) {
@@ -19,9 +20,9 @@ export class Routes {
     const api = app.basePath('/api')
 
     // Assign the API routes
-    users(api)
-    authX(api)
-    authEvm(api)
+    api.route('/users', users)
+    api.route('/auth/x', authX)
+    api.route('/auth/evm', authEvm)
 
     // Client-side routing - these should come AFTER API routes
     if (isDev) {
