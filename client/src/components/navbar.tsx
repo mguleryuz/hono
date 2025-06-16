@@ -1,10 +1,9 @@
 'use client'
 
 import { Button } from '@c/components/ui/button'
-import { Home, Menu } from 'lucide-react'
-import { WalletWidget } from './wallet-widget'
 import { Link, useLocation } from '@tanstack/react-router'
-import { Separator } from './ui/separator'
+import { Home, Menu } from 'lucide-react'
+
 import {
   Drawer,
   DrawerContent,
@@ -12,17 +11,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from './ui/drawer'
+import { Separator } from './ui/separator'
+import { WalletWidget } from './wallet-widget'
 
 export function Navbar() {
   const pathname = useLocation().pathname
   return (
     <div
-      className={`
-      items-center py-2 px-4 flex w-screen
-      justify-between gap-3 top-0 
-      drop-shadow-2xl bg-background-100/50 backdrop-blur-2xl
-      border-b border-input
-    `.trim()}
+      className={`bg-background-100/50 border-input top-0 flex w-screen items-center justify-between gap-3 border-b px-4 py-2 drop-shadow-2xl backdrop-blur-2xl`.trim()}
     >
       <div className="flex items-center gap-2">
         <Link to="/">
@@ -31,7 +27,7 @@ export function Navbar() {
 
         <Separator orientation="vertical" />
 
-        <div className="items-center hidden md:flex gap-4">
+        <div className="hidden items-center gap-4 md:flex">
           <NavItems pathname={pathname} />
         </div>
       </div>
@@ -42,14 +38,14 @@ export function Navbar() {
         <span className="md:hidden">
           <Drawer>
             <DrawerTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Menu className="fill-current w-5 h-5" />
+              <Button variant="outline" size="sm">
+                <Menu className="h-5 w-5 fill-current" />
               </Button>
             </DrawerTrigger>
             <DrawerContent aria-describedby="mobile-menu">
               <DrawerTitle className="border-none" />
               <DrawerDescription />
-              <div className="p-4 flex flex-col gap-4">
+              <div className="flex flex-col gap-4 p-4">
                 <NavItems pathname={pathname} />
               </div>
             </DrawerContent>

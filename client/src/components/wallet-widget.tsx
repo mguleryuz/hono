@@ -5,7 +5,7 @@ import { getAuthMethod } from '@/utils/env'
 import { useAuthEvm, useChainSpecs } from '@c/hooks'
 import { cn } from '@c/utils'
 import { useAccountModal, useConnectModal } from '@rainbow-me/rainbowkit'
-import { CircleAlert, Pointer, Wallet } from 'lucide-react'
+import { CircleAlert, PenTool, Pointer, Wallet } from 'lucide-react'
 
 import { Button } from './ui/button'
 import type { ButtonProps } from './ui/button'
@@ -51,6 +51,8 @@ export function WalletWidget(props: WalletWidgetProps) {
     if ('startIcon' in props) return props.startIcon
     if (!isConnected) return <Wallet size={20} />
 
+    if (auth.signatureRequired) return <PenTool size={20} />
+
     if (!!iconSrc)
       return (
         <img
@@ -77,6 +79,7 @@ export function WalletWidget(props: WalletWidgetProps) {
 
   const getChildren = () => {
     if (!isConnected) return 'Connect Wallet'
+    if (auth.signatureRequired) return 'Sign Message'
     if (!!text) return text
 
     return compressAddress(address)
@@ -84,7 +87,8 @@ export function WalletWidget(props: WalletWidgetProps) {
 
   const color = (() => {
     if ('color' in props) return props.color
-    if (!isConnected || !!text || isUnsupportedChain) return 'primary'
+    if (!isConnected || !!text || isUnsupportedChain || auth.signatureRequired)
+      return 'primary'
     return ''
   })()
 

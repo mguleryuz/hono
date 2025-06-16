@@ -116,8 +116,8 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
             modalMobile: 'var(--radius)',
           },
           colors: {
-            accentColor: 'var(--link)',
-            accentColorForeground: 'var(--accent-foreground)',
+            accentColor: 'var(--primary)',
+            accentColorForeground: 'var(--primary-foreground)',
             actionButtonBorder: 'var(--border)',
             actionButtonBorderMobile: 'var(--border)',
             actionButtonSecondaryBackground: 'var(--muted)',
@@ -144,7 +144,7 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
             profileAction: 'var(--secondary)',
             profileActionHover: 'var(--secondary-hover)',
             profileForeground: 'var(--background)',
-            selectedOptionBorder: 'var(--accent)',
+            selectedOptionBorder: 'var(--border)',
             standby: 'var(--secondary)',
           },
         }}
