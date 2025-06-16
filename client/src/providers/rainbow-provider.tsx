@@ -2,7 +2,7 @@
 
 // Third-party dependencies
 import { getAuthMethod } from '@/utils/env'
-import { useEvmAuth } from '@c/hooks'
+import { useAuthEvm } from '@c/hooks'
 import {
   createAuthenticationAdapter,
   RainbowKitAuthenticationProvider,
@@ -20,7 +20,7 @@ const isEvmAuth = authMethod === 'evm'
 // ============================================================================
 
 export function RainbowProvider({ children }: { children: React.ReactNode }) {
-  const auth = useEvmAuth()
+  const auth = useAuthEvm()
 
   // Prepare the authentication adapter
   const authenticationAdapter = createAuthenticationAdapter({

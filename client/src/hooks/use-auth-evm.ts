@@ -4,11 +4,11 @@ import { useQuery } from '@tanstack/react-query'
 import { useAccount } from 'wagmi'
 
 const authMethod = getAuthMethod()
-const isEvmAuthEnabled = authMethod === 'evm'
+const isAuthEvmEnabled = authMethod === 'evm'
 
-export type UseEvmAuthReturnType = ReturnType<typeof useEvmAuth>
+export type UseAuthEvmReturnType = ReturnType<typeof useAuthEvm>
 
-export function useEvmAuth() {
+export function useAuthEvm() {
   const { isConnected } = useAccount()
 
   const authQuery = useQuery({
@@ -44,7 +44,7 @@ export function useEvmAuth() {
       role: null,
       status: 'unauthenticated',
     },
-    enabled: isEvmAuthEnabled && isConnected,
+    enabled: isAuthEvmEnabled && isConnected,
     refetchOnWindowFocus: false,
     retry: false,
   })

@@ -1,11 +1,15 @@
 'use client'
 
 import type { Auth } from '@/types'
+import { getAuthMethod } from '@/utils/env'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
-export type UserAuthReturnType = ReturnType<typeof useXAuth>
+const authMethod = getAuthMethod()
+const isAuthXEnabled = authMethod === 'twitter'
 
-export function useXAuth() {
+export type UserAuthXReturnType = ReturnType<typeof useAuthX>
+
+export function useAuthX() {
   const authQuery = useQuery({
     queryKey: ['auth'],
     queryFn: async () => {
@@ -21,6 +25,7 @@ export function useXAuth() {
 
       return json
     },
+    enabled: isAuthXEnabled,
     retry: 1,
     refetchOnWindowFocus: false,
   })

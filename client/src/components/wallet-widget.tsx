@@ -1,13 +1,14 @@
 'use client'
 
 import * as React from 'react'
-import { useChainSpecs, useEvmAuth } from '@c/hooks'
-import { cn } from '@c/utils'
 import { getAuthMethod } from '@/utils/env'
+import { useAuthEvm, useChainSpecs } from '@c/hooks'
+import { cn } from '@c/utils'
+import { useAccountModal, useConnectModal } from '@rainbow-me/rainbowkit'
+import { CircleAlert, Pointer, Wallet } from 'lucide-react'
+
 import { Button } from './ui/button'
 import type { ButtonProps } from './ui/button'
-import { CircleAlert, Pointer, Wallet } from 'lucide-react'
-import { useAccountModal, useConnectModal } from '@rainbow-me/rainbowkit'
 
 const authMethod = getAuthMethod()
 const isEvmAuth = authMethod === 'evm'
@@ -30,7 +31,7 @@ export function WalletWidget(props: WalletWidgetProps) {
   const { openConnectModal } = useConnectModal()
   const { openAccountModal } = useAccountModal()
 
-  const auth = useEvmAuth()
+  const auth = useAuthEvm()
 
   const setShowWalletWidget = () =>
     !isConnected || (isEvmAuth && auth.data.status !== 'authenticated')

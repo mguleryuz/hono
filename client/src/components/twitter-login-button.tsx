@@ -1,5 +1,5 @@
-import { useXAuth } from '@c/hooks'
 import { Button, type ButtonProps } from '@c/components/ui/button'
+import { useAuthX } from '@c/hooks'
 
 export function TwitterLoginButton({
   className,
@@ -8,7 +8,7 @@ export function TwitterLoginButton({
   className?: string
   variant?: ButtonProps['variant']
 }) {
-  const auth = useXAuth()
+  const auth = useAuthX()
 
   if (auth.isPending || auth.logout.isPending)
     return (

@@ -1,3 +1,3 @@
-export * from './use-x-auth'
-export * from './use-evm-auth'
+export * from './use-auth-x'
+export * from './use-auth-evm'
 export * from './use-chain-specs'
