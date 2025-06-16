@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { useAccount, useChains } from 'wagmi'
 import { ChainLogo } from '@api3/logos'
+import { useAccount, useChains } from 'wagmi'
 
 export const getIconSrc = (chainId?: number) => {
   const fallback = (ChainLogo('1') as any)?.src || ChainLogo('1')

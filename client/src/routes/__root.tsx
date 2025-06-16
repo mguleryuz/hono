@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { Providers } from '@c/providers'
 import { Navbar } from '@c/components/navbar'
+import { Providers } from '@c/providers'
+import { createRootRoute, Outlet } from '@tanstack/react-router'
 
 import '@c/styles/global.css'
 

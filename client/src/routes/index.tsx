@@ -9,7 +9,7 @@ export const Route = createFileRoute('/')({
 function AdminComponent() {
   return (
     <div className="page">
-      <div className="flex flex-col items-center justify-center gap-5 m-auto max-w-sm text-center">
+      <div className="m-auto flex max-w-sm flex-col items-center justify-center gap-5 text-center">
         <Flame size={100} />
         <h1>Welcome to Hono + Vite Server!</h1>
       </div>

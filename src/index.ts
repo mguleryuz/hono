@@ -1,22 +1,21 @@
 // Dependencies
-import { Hono } from 'hono'
-import { logger } from 'hono/logger'
-import { cors } from 'hono/cors'
-
-// Utils
-import { connectDb, sessionMiddleware } from '@/utils/server'
-import { logger as log } from '@/utils/logger'
 
 // Services
 import { BucketService } from '@/bucket.service'
-
+import { Jobs } from '@/jobs'
 // Handlers
 import { Routes } from '@/routes'
-import { Jobs } from '@/jobs'
-import { TwitterService } from './twitter.service'
-import { AuthXService } from './auth.x.service'
+import { logger as log } from '@/utils/logger'
+// Utils
+import { connectDb, sessionMiddleware } from '@/utils/server'
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
+import { logger } from 'hono/logger'
+
 import { AuthEvmService } from './auth.evm.service'
+import { AuthXService } from './auth.x.service'
 import { SocialDataService } from './socialdata.service'
+import { TwitterService } from './twitter.service'
 
 // ------------------------------------------------------------
 // Server

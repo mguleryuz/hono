@@ -1,7 +1,7 @@
 import 'mongoose'
 
-import { Connection as MongooseConnection } from 'mongoose'
 import { GridFSBucket } from 'mongodb'
+import { Connection as MongooseConnection } from 'mongoose'
 
 declare module 'mongoose' {
   interface Connection extends MongooseConnection {

@@ -1,6 +1,7 @@
+import { Link } from '@tanstack/react-router'
+
 import { Button } from './button'
 import { Separator } from './separator'
-import { Link } from '@tanstack/react-router'
 
 export function FourOFour() {
   return (

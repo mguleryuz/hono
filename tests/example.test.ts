@@ -1,4 +1,5 @@
-import { expect, describe, it } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
+
 import { writeLog } from '../tools'
 
 describe('Should give a hint about the bun tests', () => {

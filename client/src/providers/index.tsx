@@ -2,8 +2,9 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
-import { ConnectorProvider } from './connector-provider'
+
 import { AppProvider } from './app-context'
+import { ConnectorProvider } from './connector-provider'
 import { RainbowProvider } from './rainbow-provider'
 
 const isDev = process.env.NODE_ENV === 'development'
