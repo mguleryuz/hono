@@ -1,9 +1,10 @@
 import { UserModel } from '@/mongo/user.mongo'
 import type { Auth, User } from '@/types'
-import { getOrigin, HTTPError } from '@/utils'
+import { getOrigin } from '@/utils'
 import { decryptToken, encryptToken } from '@/utils/server'
 import debug from 'debug'
 import type { Context } from 'hono'
+import { HTTPException } from 'hono/http-exception'
 import { TwitterApi } from 'twitter-api-v2'
 
 const d = debug('auth.x.service')
@@ -33,7 +34,9 @@ export class AuthXService {
   generateAuthLink = () => {
     if (!this.client) {
       d('Twitter client not initialized')
-      throw new HTTPError('Twitter client not initialized', 500)
+      throw new HTTPException(500, {
+        message: 'Twitter client not initialized',
+      })
     }
 
     return this.client.generateOAuth2AuthLink(this.callbackUrl, {
@@ -97,7 +100,9 @@ export class AuthXService {
     try {
       if (!this.client) {
         d('Twitter client not initialized')
-        throw new HTTPError('Twitter client not initialized', 500)
+        throw new HTTPException(500, {
+          message: 'Twitter client not initialized',
+        })
       }
 
       // Exchange authorization code for access tokens
@@ -186,7 +191,9 @@ export class AuthXService {
     // Check if user is authenticated
     if (!auth.twitterUserId) {
       d('User is not authenticated')
-      throw new HTTPError('Not authenticated', 401)
+      throw new HTTPException(401, {
+        message: 'Not authenticated',
+      })
     }
 
     let accessToken: string | null = null
@@ -200,7 +207,9 @@ export class AuthXService {
     if (!accessToken) {
       d('Destroying session')
       c.req.session.destroy()
-      throw new HTTPError('Session expired', 401)
+      throw new HTTPException(401, {
+        message: 'Session expired',
+      })
     }
 
     // Verify user still exists in database
@@ -209,7 +218,9 @@ export class AuthXService {
     // Handle case where user was deleted
     if (!userExists) {
       c.req.session.destroy()
-      throw new HTTPError('User not found', 404)
+      throw new HTTPException(404, {
+        message: 'User not found',
+      })
     }
 
     const twitterRateLimits = await UserModel.findById(auth.id, {
@@ -256,7 +267,9 @@ export class AuthXService {
     // Handle user not found
     if (!user) {
       d('User not found')
-      throw new HTTPError('User not found', 404)
+      throw new HTTPException(404, {
+        message: 'User not found',
+      })
     }
 
     // Check if current token is still valid
@@ -268,7 +281,9 @@ export class AuthXService {
       // Return existing token if not expired
       if (!user.twitterAccessToken) {
         d('Access token not found')
-        throw new HTTPError('Access token not found', 404)
+        throw new HTTPException(404, {
+          message: 'Access token not found',
+        })
       }
 
       d('Returning existing token')
@@ -278,7 +293,9 @@ export class AuthXService {
     // Ensure refresh token exists
     if (!user.twitterRefreshToken) {
       d('Refresh token not found')
-      throw new HTTPError('Refresh token not found', 404)
+      throw new HTTPException(404, {
+        message: 'Refresh token not found',
+      })
     }
 
     // Decrypt stored refresh token
@@ -288,7 +305,9 @@ export class AuthXService {
     try {
       if (!this.client) {
         d('Twitter client not initialized')
-        throw new HTTPError('Twitter client not initialized', 500)
+        throw new HTTPException(500, {
+          message: 'Twitter client not initialized',
+        })
       }
 
       // Exchange refresh token for new tokens
@@ -314,10 +333,9 @@ export class AuthXService {
       return accessToken
     } catch (error: any) {
       d('Failed to refresh access token', error)
-      throw new HTTPError(
-        `Error refreshing access token for user ${userId}, error: ${error?.message ?? 'Unknown error message'}`,
-        500
-      )
+      throw new HTTPException(500, {
+        message: `Error refreshing access token for user ${userId}, error: ${error?.message ?? 'Unknown error message'}`,
+      })
     }
   }
 }

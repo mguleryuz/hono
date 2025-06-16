@@ -1,11 +1,10 @@
 'use client'
 
 // Third-party dependencies
+import { chains, getERPCTransport } from '@/utils'
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
 import type { HttpTransport } from 'viem'
 import { WagmiProvider } from 'wagmi'
-
-import { chains, getDrpcTransport } from '@/utils'
 
 /**
  * Creates Wagmi configuration with specified chains and transport settings
@@ -17,7 +16,7 @@ const config = getDefaultConfig({
   multiInjectedProviderDiscovery: false,
   transports: chains.reduce(
     (acc, chain) => {
-      acc[chain.id] = getDrpcTransport(chain.id)
+      acc[chain.id] = getERPCTransport(chain.id)
       return acc
     },
     {} as Record<number, HttpTransport>

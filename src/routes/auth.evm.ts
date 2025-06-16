@@ -1,6 +1,5 @@
-import type { HTTPError } from '@/utils'
 import { Hono } from 'hono'
-import type { ContentfulStatusCode } from 'hono/utils/http-status'
+import type { HTTPException } from 'hono/http-exception'
 
 import { authEvmService } from '..'
 
@@ -11,9 +10,9 @@ authEvm.get('/nonce', async (c) => {
     const nonce = await authEvmService.nonce(c)
     return c.text(nonce)
   } catch (error: unknown) {
-    const e = error as HTTPError
+    const e = error as HTTPException
 
-    return c.json({ message: e.message }, e.statusCode as ContentfulStatusCode)
+    return c.json({ message: e.message }, e.status)
   }
 })
 
@@ -22,8 +21,8 @@ authEvm.post('/verify', async (c) => {
     const result = await authEvmService.verify(c)
     return c.json(result)
   } catch (error: unknown) {
-    const e = error as HTTPError
-    return c.json({ message: e.message }, e.statusCode as ContentfulStatusCode)
+    const e = error as HTTPException
+    return c.json({ message: e.message }, e.status)
   }
 })
 
@@ -32,8 +31,8 @@ authEvm.get('/session', async (c) => {
     const result = await authEvmService.session(c)
     return c.json(result)
   } catch (error: unknown) {
-    const e = error as HTTPError
-    return c.json({ message: e.message }, e.statusCode as ContentfulStatusCode)
+    const e = error as HTTPException
+    return c.json({ message: e.message }, e.status)
   }
 })
 
@@ -42,7 +41,7 @@ authEvm.get('/signout', async (c) => {
     const result = await authEvmService.signout(c)
     return c.json(result)
   } catch (error: unknown) {
-    const e = error as HTTPError
-    return c.json({ message: e.message }, e.statusCode as ContentfulStatusCode)
+    const e = error as HTTPException
+    return c.json({ message: e.message }, e.status)
   }
 })

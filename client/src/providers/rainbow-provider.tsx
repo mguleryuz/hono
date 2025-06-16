@@ -20,16 +20,27 @@ const isEvmAuth = authMethod === 'evm'
 // ============================================================================
 
 export function RainbowProvider({ children }: { children: React.ReactNode }) {
+  // Use consolidated auth hook with auto-prompt enabled globally
   const auth = useAuthEvm()
 
   // Prepare the authentication adapter
   const authenticationAdapter = createAuthenticationAdapter({
     getNonce: async () => {
-      const res = await fetch(`/api/auth/evm/nonce`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-      return await res.text()
+      try {
+        const res = await fetch(`/api/auth/evm/nonce`, {
+          method: 'GET',
+          credentials: 'include',
+        })
+
+        if (!res.ok) {
+          throw new Error('Failed to get nonce')
+        }
+
+        return await res.text()
+      } catch (error) {
+        console.error('Error getting nonce:', error)
+        throw error
+      }
     },
     createMessage: ({ nonce, address, chainId }) =>
       createSiweMessage({
@@ -42,25 +53,39 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
         statement: 'EVM Sign in by <project_name>',
       }),
     verify: async ({ message, signature }) => {
-      const verifyRes = await fetch('/api/auth/evm/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, signature }),
-      })
+      try {
+        const verifyRes = await fetch('/api/auth/evm/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, signature }),
+          credentials: 'include',
+        })
 
-      const ok = Boolean(verifyRes.ok)
+        const ok = Boolean(verifyRes.ok)
 
-      if (ok) await auth.refetch()
+        if (ok) {
+          // Refetch auth state after successful verification
+          await auth.refetch()
+        }
 
-      return ok
+        return ok
+      } catch (error) {
+        console.error('Error verifying message:', error)
+        return false
+      }
     },
     signOut: async () => {
-      await fetch(`/api/auth/evm/signout`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-
-      await auth.refetch()
+      try {
+        await fetch(`/api/auth/evm/signout`, {
+          method: 'GET',
+          credentials: 'include',
+        })
+      } catch (error) {
+        console.error('Error signing out:', error)
+      } finally {
+        // Always refetch to update local state after signout
+        await auth.refetch()
+      }
     },
   })
 
@@ -68,10 +93,11 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
   return (
     <RainbowKitAuthenticationProvider
       adapter={authenticationAdapter}
-      status={auth.data.status!}
+      status={auth.data.status}
       enabled={isEvmAuth}
     >
       <RainbowKitProvider
+        showRecentTransactions={true}
         avatar={() => (
           <img
             src="/images/icon.svg"

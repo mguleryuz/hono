@@ -1,10 +1,10 @@
 'use server'
 
-import { scrypt, randomBytes } from 'crypto'
+import { randomBytes, scrypt } from 'crypto'
 import { promisify } from 'util'
 import type { UserRole } from '@/types'
 import type { Context } from 'hono'
-import { HTTPError } from '..'
+import { HTTPException } from 'hono/http-exception'
 
 /**
  * Asserts that a value is not undefined or null
@@ -15,10 +15,9 @@ import { HTTPError } from '..'
  */
 export function authorized(value: any, message?: string) {
   if (!value)
-    throw new HTTPError(
-      !!message ? `Unauthorized: ${message}` : 'Unauthorized',
-      401
-    )
+    throw new HTTPException(401, {
+      message: !!message ? `Unauthorized: ${message}` : 'Unauthorized',
+    })
 }
 
 // Updated adminOnly function
@@ -66,7 +65,9 @@ async function getUserRoleFromTokenOrSession({
     return { role: sessionRole, id: sessionId }
   }
 
-  throw new HTTPError('No session found', 401)
+  throw new HTTPException(401, {
+    message: 'No session found',
+  })
 }
 
 const scryptAsync = promisify(scrypt)

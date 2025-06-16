@@ -1,5 +1,6 @@
-import { logger } from './logger'
 import chalk from 'chalk'
+
+import { logger } from './logger'
 
 // Social Data / API Keys
 export const getSocialDataToolsApiKey = () =>

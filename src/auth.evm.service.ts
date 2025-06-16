@@ -1,5 +1,6 @@
-import { getPublicClient, HTTPError } from '@/utils'
+import { getPublicClient } from '@/utils'
 import type { Context } from 'hono'
+import { HTTPException } from 'hono/http-exception'
 import type { RequiredDeep } from 'type-fest'
 import {
   generateSiweNonce,
@@ -37,12 +38,17 @@ export class AuthEvmService {
 
     if (!success) {
       c.req.session.destroy()
-      throw new HTTPError('UnAuthorized verification was not successful', 401)
+      throw new HTTPException(401, {
+        message: 'UnAuthorized verification was not successful',
+      })
     }
 
     const nonce = c.req.session.auth?.nonce
 
-    if (siweMessage.nonce !== nonce) throw new HTTPError('Invalid nonce', 422)
+    if (siweMessage.nonce !== nonce)
+      throw new HTTPException(422, {
+        message: 'Invalid nonce',
+      })
 
     const { address } = siweMessage
 
@@ -89,7 +95,9 @@ export class AuthEvmService {
     const sessionData = c.req.session.auth
 
     if (!sessionData?.address || !sessionData?.role) {
-      throw new HTTPError('Unauthorized', 401)
+      throw new HTTPException(401, {
+        message: 'Unauthorized',
+      })
     }
 
     return {
@@ -100,9 +108,11 @@ export class AuthEvmService {
   }
 
   async signout(c: Context) {
+    const hadSession = !!c.req.session.auth
+
     c.req.session.destroy()
 
-    console.log('signout', c.req.session.auth)
+    console.log('signout completed, had session:', hadSession)
 
     return { success: true }
   }
