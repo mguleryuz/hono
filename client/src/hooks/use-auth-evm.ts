@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import type { Auth } from '@/types'
 import { getAuthMethod } from '@/utils/env'

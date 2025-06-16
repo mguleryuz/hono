@@ -1,3 +1,8 @@
 {
-  "tailwindCSS.experimental.configFile": "client/styles/global.css"
+  "tailwindCSS.experimental.configFile": "client/styles/global.css",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  }
 }
