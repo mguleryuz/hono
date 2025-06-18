@@ -12,7 +12,7 @@ export type UsersReturnType = Pick<
 
 export const users = new Hono()
 
-users.get('/users', async (c) => {
+users.get('/', async (c) => {
   try {
     const users = await UserModel.find()
       .sort({ points: -1 })
