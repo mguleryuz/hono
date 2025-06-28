@@ -1,5 +1,11 @@
 {
-  "exclude": ["packages", "build", "node_modules", "*/dist", "*/.tanstack"],
+  "exclude": [
+    "packages",
+    "build",
+    "**/*/node_modules",
+    "**/*/dist",
+    "**/*/.tanstack"
+  ],
   "compilerOptions": {
     // Enable latest features
     "lib": ["ESNext", "DOM"],

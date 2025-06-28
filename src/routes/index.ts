@@ -4,6 +4,7 @@ import { serveStatic } from 'hono/bun'
 
 import { authEvm } from './auth.evm'
 import { authX } from './auth.x'
+import { docs } from './docs'
 import { users } from './users'
 
 export class Routes {
@@ -23,6 +24,7 @@ export class Routes {
     api.route('/users', users)
     api.route('/auth/x', authX)
     api.route('/auth/evm', authEvm)
+    api.route('/docs', docs)
 
     // Client-side routing - these should come AFTER API routes
     if (isDev) {

@@ -20,11 +20,15 @@ export class UserService {
     const totalCount = await UserModel.countDocuments()
 
     // Get paginated users sorted by points
-    const users = await UserModel.find()
+    const users = await UserModel.find(
+      {},
+      {
+        api_secrets: 0,
+      }
+    )
       .sort({ points: -1 })
       .skip((validPage - 1) * validLimit)
       .limit(validLimit)
-      // .select('username display_name points')
       .lean()
 
     // Calculate pagination metadata

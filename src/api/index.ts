@@ -12,7 +12,7 @@ const ErrorResponse = Schema.Struct({
 })
 
 // Define the API contract
-const Api = HttpApi.make('Api')
+export const Api = HttpApi.make('Api')
   // Define global errors that apply to all endpoints
   .addError(ErrorResponse, { status: 400 }) // Bad Request
   .addError(ErrorResponse, { status: 401 }) // Unauthorized

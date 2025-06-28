@@ -65,7 +65,7 @@ export type User = {
 // ----------------------------------------------------------------------------
 // SCHEMAS
 
-export const ApiSecretSchema = new Schema<ApiSecret>(
+export const ApiSecretSchema = new Schema(
   {
     title: {
       type: String,
@@ -80,7 +80,7 @@ export const ApiSecretSchema = new Schema<ApiSecret>(
     _id: false,
     timestamps: true,
   }
-)
+) satisfies Schema<ApiSecret>
 
 // Schema for the SingleTwitterRateLimit structure (used in main and day limits)
 const SingleTwitterRateLimitSchema = {
@@ -98,7 +98,7 @@ const SingleTwitterRateLimitSchema = {
   },
 }
 
-export const TwitterRateLimitSchema = new Schema<TwitterRateLimitWithContext>(
+export const TwitterRateLimitSchema = new Schema(
   {
     // Standard rate limit fields (SingleTwitterRateLimit)
     ...SingleTwitterRateLimitSchema,
@@ -126,9 +126,9 @@ export const TwitterRateLimitSchema = new Schema<TwitterRateLimitWithContext>(
   {
     _id: false,
   }
-)
+) satisfies Schema<TwitterRateLimitWithContext>
 
-export const UserSchema = new Schema<User>(
+export const UserSchema = new Schema(
   {
     role: {
       type: String,
@@ -187,7 +187,7 @@ export const UserSchema = new Schema<User>(
     },
   },
   { timestamps: true }
-)
+) satisfies Schema<User>
 
 // ----------------------------------------------------------------------------
 // MODEL

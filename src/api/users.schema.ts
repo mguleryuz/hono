@@ -1,15 +1,11 @@
-import type { User } from '@/mongo'
+import { ApiSecretSchema, type User } from '@/mongo'
+import { mongooseToEffectSchema } from '@/utils'
 import { HttpApiEndpoint, HttpApiGroup } from '@effect/platform'
 import { Schema } from 'effect'
 
 import { PaginationResponse } from './base.schema'
 
-export const ApiSecret = Schema.Struct({
-  title: Schema.String,
-  secret: Schema.String,
-  createdAt: Schema.Date,
-  updatedAt: Schema.Date,
-})
+export const ApiSecret = mongooseToEffectSchema(ApiSecretSchema)
 
 export const TwitterRateLimit = Schema.Struct({
   endpoint: Schema.String,
@@ -43,8 +39,10 @@ export const UserResponse = Schema.Struct({
   updatedAt: Schema.Date,
 } satisfies Record<keyof User, any>)
 
+export const PublicUserResponse = UserResponse.omit('api_secrets')
+
 export const UsersResponse = Schema.Struct({
-  users: Schema.Array(UserResponse),
+  users: Schema.Array(PublicUserResponse),
   pagination: PaginationResponse,
 })
 
