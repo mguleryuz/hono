@@ -33,7 +33,7 @@ type SignOutResponseType = GetCleanSuccessType<'whatsappAuth', 'signout'>
  * Uses WhatsApp Business API SDK to send OTP codes via WhatsApp messages
  */
 export class AuthWhatsAppService {
-  readonly wabaClient: WABAClient
+  readonly wabaClient: WABAClient | null = null
 
   constructor() {
     const accessToken = getWhatsAppAccessToken()
@@ -41,9 +41,10 @@ export class AuthWhatsAppService {
     const accountId = getWhatsAppBusinessAccountId()
 
     if (!accessToken || !phoneNumberId || !accountId) {
-      throw new Error(
+      logger.warn(
         'WhatsApp credentials not configured properly. Required: WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_BUSINESS_ACCOUNT_ID'
       )
+      return
     }
 
     this.wabaClient = new WABAClient({
@@ -91,6 +92,10 @@ export class AuthWhatsAppService {
       const formattedPhoneNumber = phone_number.startsWith('+')
         ? phone_number.substring(1)
         : phone_number
+
+      if (!this.wabaClient) {
+        throw new Error('WhatsApp client not initialized')
+      }
 
       // Send OTP via WhatsApp Business API SDK
       const wabaResponse = await this.wabaClient.sendMessage({
@@ -213,7 +218,7 @@ export class AuthWhatsAppService {
       }).lean()
 
       const state = {
-        id: existingUser?._id.toString(),
+        mongo_id: existingUser?._id.toString(),
         role: 'USER',
         whatsapp_phone,
         status: 'authenticated',
@@ -231,7 +236,7 @@ export class AuthWhatsAppService {
           })
 
           await newUser.save()
-          state.id = newUser._id.toString()
+          state.mongo_id = newUser._id.toString()
           Object.assign(c.req.session, state)
         } catch (error: any) {
           logger.error('Error creating new user', {
@@ -249,11 +254,11 @@ export class AuthWhatsAppService {
 
       logger.info('OTP verification successful', {
         phone_number: this.maskPhoneNumber(whatsapp_phone),
-        user_id: state.id,
+        user_id: state.mongo_id,
       })
 
       const response: SessionType = {
-        id: state.id!,
+        mongo_id: state.mongo_id!,
         role: state.role,
         whatsapp_phone: state.whatsapp_phone,
         status: 'authenticated',
@@ -290,7 +295,7 @@ export class AuthWhatsAppService {
     }
 
     return {
-      id: sessionData.id,
+      mongo_id: sessionData.mongo_id!,
       role: sessionData.role,
       whatsapp_phone: sessionData.whatsapp_phone!,
       status: 'authenticated',

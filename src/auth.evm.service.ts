@@ -3,7 +3,7 @@ import type {
   GetRequestParams,
   InternalSession,
 } from '@/types'
-import { getPublicClient } from '@/utils'
+import { getPublicClient, logger } from '@/utils'
 import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import {
@@ -63,7 +63,7 @@ export class AuthEvmService {
     }).lean()
 
     const state = {
-      id: existingUser?._id.toString(),
+      mongo_id: existingUser?._id.toString(),
       role: 'USER',
 
       address: existingUser?.address,
@@ -74,24 +74,31 @@ export class AuthEvmService {
     // Update State and handle session
     if (!!existingUser) {
       state.role = existingUser.role
+
       Object.assign(c.req.session, state)
     } // Create a new User in MongoDB and handle session
     else {
       try {
         const newUser = new UserModel({
-          address: state.address,
+          address,
         })
 
         // Save the new User
         await newUser.save()
 
-        state.id = newUser._id.toString()
+        state.mongo_id = newUser._id.toString()
 
         Object.assign(c.req.session, state)
       } catch (e: any) {
+        logger.error('Error creating new user:', e)
         throw e
       }
     }
+
+    console.log('SESSION AT VERIFY:', {
+      address: c.req.session.address,
+      role: c.req.session.role,
+    })
 
     // Return the new Session
     return { success: true }
@@ -100,14 +107,19 @@ export class AuthEvmService {
   async session(c: Context): Promise<SessionType> {
     const sessionData = c.req.session
 
-    if (!sessionData?.chains || !sessionData?.role) {
+    console.log({
+      address: sessionData?.address,
+      role: sessionData?.role,
+    })
+
+    if (!sessionData?.address || !sessionData?.role) {
       throw new HTTPException(401, {
         message: 'Unauthorized',
       })
     }
 
     return {
-      id: sessionData.id,
+      mongo_id: sessionData.mongo_id!,
       address: sessionData.address!,
       role: sessionData.role,
       status: 'authenticated',

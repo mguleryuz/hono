@@ -233,7 +233,7 @@ export class AuthXService {
 
     // Return user data from session matching schema
     return {
-      id: auth.id,
+      mongo_id: auth.id,
       role: auth.role,
       twitter_user_id: auth.twitter_user_id,
       twitter_username: auth.twitter_username,

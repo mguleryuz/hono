@@ -6,7 +6,7 @@ import { TwitterRateLimit } from './users.schema'
  * @description Base session
  */
 const BaseSession = Schema.Struct({
-  id: Schema.String,
+  mongo_id: Schema.String,
   role: Schema.String,
   status: Schema.Union(
     Schema.Literal('authenticated'),

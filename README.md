@@ -8,6 +8,7 @@ A lightning-fast web application template using Hono.js and Bun runtime, with Mo
 - 🗃️ **MongoDB Integration**: Ready-to-use MongoDB connection with Mongoose
 - 🐳 **Docker Support**: Complete Docker setup with multi-stage builds
 - 🔄 **Job Management**: Built-in job scheduler with Cron support
+- 👥 **Users Table Demo**: Interactive users table with pagination on the welcome page
 - 🛠️ **Developer Tools**:
   - TypeScript configuration
   - ESLint + Prettier setup
@@ -91,6 +92,21 @@ This will show you various Docker operations like:
 ├── tests/ # Tests
 ├── .github/ # GitHub Actions workflows
 └── docker.sh # Docker management script
+
+## 📊 Demo Features
+
+### Users Table
+
+The welcome page includes an interactive users table that demonstrates:
+
+- **Paginated Data Fetching**: Shows users from the MongoDB database with pagination
+- **Responsive Design**: Mobile-first responsive table layout
+- **Loading States**: Skeleton loading animations while data is being fetched
+- **Error Handling**: Graceful error display if the API fails
+- **User Information Display**: Shows user roles, addresses, Twitter handles, WhatsApp numbers, and creation dates
+- **Copy Functionality**: Click to copy wallet addresses to clipboard
+
+The table fetches data from the `/api/users` endpoint and automatically updates when pagination controls are used.
 
 ## 🛠️ Development Tools
 

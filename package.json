@@ -65,6 +65,7 @@
     "cmdk": "^1.1.1",
     "connect-mongo": "^5.1.0",
     "croner": "^9.1.0",
+    "date-fns": "^4.1.0",
     "effect": "^3.16.10",
     "embla-carousel-react": "^8.6.0",
     "hono": "^4.8.3",
@@ -85,6 +86,7 @@
     "react-json-view-lite": "^2.4.1",
     "react-resizable-panels": "^3.0.3",
     "recharts": "^2.15.4",
+    "snappy": "^7.2.2",
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.3.1",
     "twitter-api-v2": "^1.24.0",
@@ -122,5 +124,10 @@
     "vite": "^6.3.5",
     "vite-plugin-compression": "^0.5.1",
     "rollup-plugin-visualizer": "^6.0.3"
-  }
+  },
+  "trustedDependencies": [
+    "@mongodb-js/zstd",
+    "mongodb",
+    "sharp"
+  ]
 }

@@ -35,7 +35,7 @@ export function useAuthEvm() {
     {},
     {
       initialData: {
-        id: '',
+        mongo_id: '',
         address: '',
         role: 'USER',
         status: 'unauthenticated',
