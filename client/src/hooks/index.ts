@@ -1,4 +1,6 @@
 export * from './use-auth-evm'
+export * from './use-auth-whatsapp'
 export * from './use-auth-x'
 export * from './use-chain-specs'
+export * from './use-tanstack-effect'
 export * from './use-theme'

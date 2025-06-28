@@ -1,5 +1,5 @@
 import { UserModel } from '@/mongo/user.mongo'
-import type { Auth, User } from '@/types'
+import type { GetCleanSuccessType, User } from '@/types'
 import { getOrigin } from '@/utils'
 import { decryptToken, encryptToken } from '@/utils/server'
 import debug from 'debug'
@@ -8,6 +8,10 @@ import { HTTPException } from 'hono/http-exception'
 import { TwitterApi } from 'twitter-api-v2'
 
 const d = debug('auth.x.service')
+
+// Schema type imports
+type TwitterSessionType = GetCleanSuccessType<'twitterAuth', 'session'>
+type LogoutResponseType = GetCleanSuccessType<'twitterAuth', 'logout'>
 
 /**
  * Service handling Twitter OAuth authentication flow and user session management
@@ -62,7 +66,7 @@ export class AuthXService {
   /**
    * Initiate Twitter OAuth flow by redirecting user to Twitter login
    */
-  twitterLogin(c: Context) {
+  login(c: Context) {
     // Generate auth URL and state for security
     const { url, codeVerifier, state } = this.generateAuthLink()
 
@@ -83,7 +87,7 @@ export class AuthXService {
   /**
    * Handle callback from Twitter OAuth and create/update user session
    */
-  async twitterCallback(c: Context) {
+  async callback(c: Context) {
     const { code, state } = c.req.query()
 
     // Verify state parameter to prevent CSRF attacks
@@ -124,12 +128,12 @@ export class AuthXService {
 
       // Prepare user data for database storage
       const userData: Partial<User> = {
-        twitterUsername: twitterUser.data.username,
-        twitterDisplayName: twitterUser.data.name,
-        twitterProfileImageUrl: twitterUser.data.profile_image_url,
-        twitterAccessToken: encryptToken(accessToken),
-        twitterRefreshToken: encryptToken(refreshToken),
-        twitterAccessTokenExpiresAt: expiresAt,
+        twitter_username: twitterUser.data.username,
+        twitter_display_name: twitterUser.data.name,
+        twitter_profile_image_url: twitterUser.data.profile_image_url,
+        twitter_access_token: encryptToken(accessToken),
+        twitter_refresh_token: encryptToken(refreshToken),
+        twitter_access_token_expires_at: expiresAt,
         address: undefined,
       }
 
@@ -144,18 +148,18 @@ export class AuthXService {
       )
 
       // Set up user session with necessary authentication data
-      c.req.session.auth = {
+      Object.assign(c.req.session, {
         role: user.role,
         id: user._id.toString(),
 
         address: user.address,
 
-        twitterUserId: user.twitterUserId,
-        twitterUsername: user.twitterUsername,
-        twitterDisplayName: user.twitterDisplayName,
-        twitterProfileImageUrl: user.twitterProfileImageUrl,
-        twitterAccessTokenExpiresAt: expiresAt,
-      }
+        twitter_user_id: user.twitter_user_id,
+        twitter_username: user.twitter_username,
+        twitter_display_name: user.twitter_display_name,
+        twitter_profile_image_url: user.twitter_profile_image_url,
+        twitter_access_token_expires_at: expiresAt,
+      })
 
       // Set a longer session duration (30 days) instead of using Twitter's expiration time
       // This works because we can refresh the token when needed
@@ -182,7 +186,7 @@ export class AuthXService {
   /**
    * Get current authenticated user information from session
    */
-  async getCurrentUser(c: Context): Promise<Auth> {
+  async getSession(c: Context): Promise<TwitterSessionType> {
     const session = c.req.session
     const { auth } = session
 
@@ -227,23 +231,23 @@ export class AuthXService {
       twitterRateLimits: 1,
     }).lean()
 
-    // Return user data from session
+    // Return user data from session matching schema
     return {
       id: auth.id,
       role: auth.role,
-
-      twitterUserId: auth.twitterUserId,
-      twitterUsername: auth.twitterUsername,
-      twitterDisplayName: auth.twitterDisplayName,
-      twitterProfileImageUrl: auth.twitterProfileImageUrl,
-      twitterRateLimits: twitterRateLimits?.twitterRateLimits,
+      twitter_user_id: auth.twitter_user_id,
+      twitter_username: auth.twitter_username,
+      twitter_display_name: auth.twitter_display_name,
+      twitter_profile_image_url: auth.twitter_profile_image_url,
+      twitter_rate_limits: twitterRateLimits?.twitter_rate_limits ?? [],
+      status: 'authenticated',
     }
   }
 
   /**
    * Logout user by destroying session
    */
-  logout(c: Context) {
+  logout(c: Context): LogoutResponseType {
     c.req.session.destroy()
     return { success: true }
   }
@@ -275,11 +279,11 @@ export class AuthXService {
     // Check if current token is still valid
     const now = new Date()
     if (
-      user.twitterAccessTokenExpiresAt &&
-      user.twitterAccessTokenExpiresAt > now
+      user.twitter_access_token_expires_at &&
+      user.twitter_access_token_expires_at > now
     ) {
       // Return existing token if not expired
-      if (!user.twitterAccessToken) {
+      if (!user.twitter_access_token) {
         d('Access token not found')
         throw new HTTPException(404, {
           message: 'Access token not found',
@@ -287,11 +291,11 @@ export class AuthXService {
       }
 
       d('Returning existing token')
-      return decryptToken(user.twitterAccessToken)
+      return decryptToken(user.twitter_access_token)
     }
 
     // Ensure refresh token exists
-    if (!user.twitterRefreshToken) {
+    if (!user.twitter_refresh_token) {
       d('Refresh token not found')
       throw new HTTPException(404, {
         message: 'Refresh token not found',
@@ -299,7 +303,7 @@ export class AuthXService {
     }
 
     // Decrypt stored refresh token
-    const decryptedRefreshToken = decryptToken(user.twitterRefreshToken)
+    const decryptedRefreshToken = decryptToken(user.twitter_refresh_token)
 
     // Use refresh token to get new access token
     try {

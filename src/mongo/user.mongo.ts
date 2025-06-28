@@ -31,31 +31,32 @@ export interface TwitterRateLimitWithContext extends TwitterApiRateLimit {
   // Context fields for our application
   endpoint: string
   method: string
-  lastUpdated: Date
+  last_updated: Date
 }
 
 export type User = {
   role: UserRole
 
-  // CONFIGS
-  initialAgentSetupPerformed: boolean
-
   // EVM
   address?: string
 
   // Twitter/X
-  twitterAccessToken?: string
-  twitterRefreshToken?: string
-  twitterAccessTokenExpiresAt?: Date
-  twitterUserId?: string
-  twitterUsername?: string
-  twitterDisplayName?: string
-  twitterProfileImageUrl?: string
-  twitterRateLimits?: TwitterRateLimitWithContext[]
+  twitter_access_token?: string
+  twitter_refresh_token?: string
+  twitter_access_token_expires_at?: Date
+
+  twitter_user_id?: string
+  twitter_username?: string
+  twitter_display_name?: string
+  twitter_profile_image_url?: string
+  twitter_rate_limits?: TwitterRateLimitWithContext[]
+
+  // WhatsApp
+  whatsapp_phone?: string
 
   // Infra
-  apiSecrets: ApiSecret[]
-  webHookUrl?: string
+  api_secrets: ApiSecret[]
+  web_hook_url?: string
 
   createdAt: Date
   updatedAt: Date
@@ -117,7 +118,7 @@ export const TwitterRateLimitSchema = new Schema<TwitterRateLimitWithContext>(
       type: String,
       required: true,
     },
-    lastUpdated: {
+    last_updated: {
       type: Date,
       default: Date.now,
     },
@@ -135,12 +136,6 @@ export const UserSchema = new Schema<User>(
       enum: EUserRole,
     },
 
-    // CONFIGS
-    initialAgentSetupPerformed: {
-      type: Boolean,
-      default: false,
-    },
-
     // EVM
     address: {
       type: String,
@@ -149,40 +144,45 @@ export const UserSchema = new Schema<User>(
     },
 
     // Twitter/X
-    twitterAccessToken: {
+    twitter_access_token: {
       type: String,
     },
-    twitterRefreshToken: {
+    twitter_refresh_token: {
       type: String,
     },
-    twitterAccessTokenExpiresAt: {
+    twitter_access_token_expires_at: {
       type: Date,
     },
-    twitterUserId: {
+    twitter_user_id: {
       type: String,
       unique: true,
       sparse: true,
     },
-    twitterUsername: {
+    twitter_username: {
       type: String,
     },
-    twitterDisplayName: {
+    twitter_display_name: {
       type: String,
     },
-    twitterProfileImageUrl: {
+    twitter_profile_image_url: {
       type: String,
     },
-    twitterRateLimits: {
+    twitter_rate_limits: {
       type: [TwitterRateLimitSchema],
       default: [],
     },
 
+    // WhatsApp
+    whatsapp_phone: {
+      type: String,
+    },
+
     // Infra
-    apiSecrets: {
+    api_secrets: {
       type: [ApiSecretSchema],
       default: [],
     },
-    webHookUrl: {
+    web_hook_url: {
       type: String,
     },
   },

@@ -1,51 +1,37 @@
 'use client'
 
-import type { Auth } from '@/types'
 import { getAuthMethod } from '@/utils/env'
-import { useMutation, useQuery } from '@tanstack/react-query'
+
+import { useEffectMutation, useEffectQuery } from './use-tanstack-effect'
 
 const authMethod = getAuthMethod()
-const isAuthXEnabled = authMethod === 'twitter'
+const isAuthXEnabled = authMethod === 'x'
 
 export type UserAuthXReturnType = ReturnType<typeof useAuthX>
 
 export function useAuthX() {
-  const authQuery = useQuery({
-    queryKey: ['auth'],
-    queryFn: async () => {
-      const res = await fetch('/api/auth/x/current-user', {
-        credentials: 'include',
-      })
+  const sessionQuery = useEffectQuery(
+    'twitterAuth',
+    'session',
+    {},
+    {
+      includeCredentials: true,
+      retry: false,
+      refetchOnWindowFocus: false,
+      // Return null on error (user not authenticated)
+      throwOnError: false,
+      enabled: isAuthXEnabled,
+    }
+  )
 
-      if (!res.ok) {
-        throw new Error('User not found')
-      }
+  const isLoggedIn = !!sessionQuery.data?.twitter_user_id
 
-      const json = <Auth>await res.json()
-
-      return json
-    },
-    enabled: isAuthXEnabled,
-    retry: 1,
-    refetchOnWindowFocus: false,
-  })
-
-  const isLoggedIn = !!authQuery.data?.twitterUserId
-
-  const logout = useMutation({
-    mutationFn: async () => {
-      const res = await fetch('/api/auth/x/logout', {
-        credentials: 'include',
-      })
-
-      if (!res.ok) {
-        throw new Error('Failed to logout')
-      }
-    },
+  const logout = useEffectMutation('twitterAuth', 'logout', {
+    includeCredentials: true,
     onSuccess: () => {
-      authQuery.refetch()
+      sessionQuery.refetch()
     },
   })
 
-  return { ...authQuery, isLoggedIn, logout }
+  return { ...sessionQuery, isLoggedIn, logout }
 }

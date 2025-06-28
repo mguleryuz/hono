@@ -7,6 +7,7 @@ let isConnected = false
 let retryCount = 0
 const MAX_RETRIES = 5
 const INITIAL_BACKOFF_MS = 1000
+const DB_NAME = 'hono'
 
 // Memory server instance for development
 let mongoMemoryServer: any = null
@@ -14,31 +15,111 @@ let mongoMemoryServer: any = null
 // Environment check
 const isDevelopment = process.env.NODE_ENV === 'development'
 
+// Static port for MongoDB Memory Server
+const MEMORY_SERVER_PORT = 27018 // Using 27018 to avoid conflicts with default MongoDB
+
 export async function connectDb() {
   try {
     // If already connected, return
-    if (isConnected) {
+    if (isConnected && mongoose.connection.readyState === 1) {
       console.log('🔌 Using existing database connection')
-      return
+      console.log(
+        `📊 Connection State: ${mongoose.connection.readyState} (1=connected)`
+      )
+      console.log(
+        `🔗 Connected to: ${mongoose.connection.host}:${mongoose.connection.port}/${mongoose.connection.name}`
+      )
+      return mongoose.connection
     }
 
     let MONGO_URI: string
 
     if (isDevelopment) {
-      const { MongoMemoryServer } = await import('mongodb-memory-server')
-      // Use MongoDB Memory Server for development
-      console.log('🚀 Starting MongoDB Memory Server for development...')
+      // First, try to connect to existing MongoDB instance on the port
+      MONGO_URI = `mongodb://127.0.0.1:${MEMORY_SERVER_PORT}/${DB_NAME}`
+      console.log(`🔍 Development mode - checking for MongoDB at: ${MONGO_URI}`)
 
-      if (!mongoMemoryServer) {
-        mongoMemoryServer = await MongoMemoryServer.create({
-          instance: {
-            dbName: 'moai-dev',
-          },
+      try {
+        console.log('🔍 Attempting to connect to existing MongoDB instance...')
+
+        // Try a quick connection test
+        await mongoose.connect(MONGO_URI, {
+          bufferCommands: false,
+          connectTimeoutMS: 5000, // Quick timeout for testing
+          serverSelectionTimeoutMS: 5000,
         })
-      }
 
-      MONGO_URI = mongoMemoryServer.getUri()
-      console.log('✅ MongoDB Memory Server started at:', MONGO_URI)
+        console.log('✅ Connected to existing MongoDB instance')
+        console.log(`📊 Connection details:`)
+        console.log(`   - URI: ${MONGO_URI}`)
+        console.log(`   - Host: ${mongoose.connection.host}`)
+        console.log(`   - Port: ${mongoose.connection.port}`)
+        console.log(`   - Database: ${mongoose.connection.name}`)
+        console.log(`   - State: ${mongoose.connection.readyState}`)
+      } catch (connectionError) {
+        console.log('⚡ No existing MongoDB found, starting Memory Server...')
+        console.log(`   - Attempted URI: ${MONGO_URI}`)
+        console.log(
+          `   - Error: ${connectionError instanceof Error ? connectionError.message : 'Unknown error'}`
+        )
+
+        // Close any failed connection attempt
+        if (mongoose.connection.readyState !== 0) {
+          await mongoose.connection.close()
+        }
+
+        // Only create a new Memory Server if connection failed
+        const { MongoMemoryServer } = await import('mongodb-memory-server')
+
+        if (!mongoMemoryServer) {
+          try {
+            console.log(
+              `🚀 Creating MongoDB Memory Server on port ${MEMORY_SERVER_PORT}...`
+            )
+            mongoMemoryServer = await MongoMemoryServer.create({
+              instance: {
+                dbName: DB_NAME,
+                port: MEMORY_SERVER_PORT,
+              },
+            })
+
+            MONGO_URI = mongoMemoryServer.getUri()
+            console.log('✅ MongoDB Memory Server started')
+            console.log(`📊 Memory Server details:`)
+            console.log(`   - URI: ${MONGO_URI}`)
+            console.log(`   - Port: ${MEMORY_SERVER_PORT}`)
+            console.log(`   - Database: ${DB_NAME}`)
+          } catch (createError: any) {
+            // If port is already in use, just use the existing connection
+            if (createError.message?.includes('already in use')) {
+              console.log(
+                '📌 Port already in use, using existing MongoDB instance'
+              )
+              MONGO_URI = `mongodb://127.0.0.1:${MEMORY_SERVER_PORT}/${DB_NAME}`
+              console.log(`   - Fallback URI: ${MONGO_URI}`)
+            } else {
+              throw createError
+            }
+          }
+        }
+
+        // Reconnect with full options
+        console.log('🔄 Reconnecting with full options...')
+        await mongoose.connect(MONGO_URI, {
+          bufferCommands: false,
+          connectTimeoutMS: 30000,
+          socketTimeoutMS: 45000,
+          serverSelectionTimeoutMS: 60000,
+          retryWrites: true,
+          compressors: ['snappy', 'zlib'],
+        })
+
+        console.log('✅ Reconnection successful')
+        console.log(`📊 Final connection details:`)
+        console.log(`   - Host: ${mongoose.connection.host}`)
+        console.log(`   - Port: ${mongoose.connection.port}`)
+        console.log(`   - Database: ${mongoose.connection.name}`)
+      }
     } else {
       // Use regular MongoDB URI for production
       const mongoUri = getMongoUri()
@@ -49,16 +130,35 @@ export async function connectDb() {
       }
 
       // Fallback to default if no URI in development
-      MONGO_URI = mongoUri || 'mongodb://localhost:27017/moai'
-    }
+      MONGO_URI = mongoUri!
 
-    console.log(
-      `🔄 Connecting to MongoDB${isDevelopment ? ' Memory Server' : ''}...`
-    )
+      console.log('🔄 Connecting to MongoDB...')
+      console.log(`📊 Production connection details:`)
+      console.log(
+        `   - URI: ${MONGO_URI.replace(/\/\/([^:]+):([^@]+)@/, '//<username>:<password>@')}`
+      ) // Hide credentials
+
+      // Connect with options
+      await mongoose.connect(MONGO_URI, {
+        bufferCommands: false,
+        connectTimeoutMS: 30000,
+        socketTimeoutMS: 45000,
+        serverSelectionTimeoutMS: 60000,
+        retryWrites: true,
+        // Disable zstd compression to avoid native module issues
+        compressors: ['snappy', 'zlib'],
+      })
+
+      console.log('✅ Connected to production MongoDB')
+      console.log(`   - Host: ${mongoose.connection.host}`)
+      console.log(`   - Port: ${mongoose.connection.port}`)
+      console.log(`   - Database: ${mongoose.connection.name}`)
+    }
 
     // Set up mongoose connection options
     mongoose.connection.on('connected', () => {
       console.log('✅ MongoDB connection established')
+      console.log(`   - Ready State: ${mongoose.connection.readyState}`)
       isConnected = true
       retryCount = 0
     })
@@ -92,21 +192,15 @@ export async function connectDb() {
       }
     })
 
-    // Connect with options
-    await mongoose.connect(MONGO_URI, {
-      bufferCommands: false,
-      connectTimeoutMS: 30000,
-      socketTimeoutMS: 45000,
-      serverSelectionTimeoutMS: 60000,
-      retryWrites: true,
-    })
-
-    mongoose.connection.bucket = new mongoose.mongo.GridFSBucket(
-      mongoose.connection.db!,
-      {
-        bucketName: 'images',
-      }
-    )
+    // Set up GridFS bucket if not already set
+    if (!mongoose.connection.bucket && mongoose.connection.db) {
+      mongoose.connection.bucket = new mongoose.mongo.GridFSBucket(
+        mongoose.connection.db,
+        {
+          bucketName: 'images',
+        }
+      )
+    }
 
     isConnected = true
   } catch (error: unknown) {

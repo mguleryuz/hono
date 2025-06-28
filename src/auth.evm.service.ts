@@ -1,7 +1,11 @@
+import type {
+  GetCleanSuccessType,
+  GetRequestParams,
+  InternalSession,
+} from '@/types'
 import { getPublicClient } from '@/utils'
 import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
-import type { RequiredDeep } from 'type-fest'
 import {
   generateSiweNonce,
   parseSiweMessage,
@@ -10,21 +14,23 @@ import {
 
 import { UserModel } from './mongo'
 
+type VerifyPayloadType = GetRequestParams<'evmAuth', 'verify'>['payload']
+type VerifyResponseType = GetCleanSuccessType<'evmAuth', 'verify'>
+type SessionType = GetCleanSuccessType<'evmAuth', 'session'>
+type NonceResponseType = GetCleanSuccessType<'evmAuth', 'nonce'>
+type SignOutResponseType = GetCleanSuccessType<'evmAuth', 'signout'>
+
 export class AuthEvmService {
-  async nonce(c: Context) {
+  nonce(c: Context): NonceResponseType {
     const nonce = generateSiweNonce()
 
-    if (!c.req.session.auth) {
-      c.req.session.auth = {} as any
-    }
-
-    c.req.session.auth.nonce = nonce
+    c.req.session.nonce = nonce
 
     return nonce
   }
 
-  async verify(c: Context) {
-    const { message, signature } = await c.req.json()
+  async verify(c: Context): Promise<VerifyResponseType> {
+    const { message, signature }: VerifyPayloadType = await c.req.json()
 
     const siweMessage = parseSiweMessage(message) as SiweMessage
 
@@ -43,7 +49,7 @@ export class AuthEvmService {
       })
     }
 
-    const nonce = c.req.session.auth?.nonce
+    const nonce = c.req.session.nonce
 
     if (siweMessage.nonce !== nonce)
       throw new HTTPException(422, {
@@ -56,19 +62,19 @@ export class AuthEvmService {
       address,
     }).lean()
 
-    const state: Partial<typeof c.req.session.auth> = {
+    const state = {
       id: existingUser?._id.toString(),
       role: 'USER',
 
-      address,
+      address: existingUser?.address,
       status: 'authenticated',
       nonce,
-    }
+    } satisfies InternalSession
 
     // Update State and handle session
     if (!!existingUser) {
       state.role = existingUser.role
-      c.req.session.auth = state as RequiredDeep<typeof state>
+      Object.assign(c.req.session, state)
     } // Create a new User in MongoDB and handle session
     else {
       try {
@@ -81,38 +87,35 @@ export class AuthEvmService {
 
         state.id = newUser._id.toString()
 
-        c.req.session.auth = state as RequiredDeep<typeof state>
+        Object.assign(c.req.session, state)
       } catch (e: any) {
         throw e
       }
     }
 
     // Return the new Session
-    return state
+    return { success: true }
   }
 
-  async session(c: Context) {
-    const sessionData = c.req.session.auth
+  async session(c: Context): Promise<SessionType> {
+    const sessionData = c.req.session
 
-    if (!sessionData?.address || !sessionData?.role) {
+    if (!sessionData?.chains || !sessionData?.role) {
       throw new HTTPException(401, {
         message: 'Unauthorized',
       })
     }
 
     return {
-      address: sessionData.address,
+      id: sessionData.id,
+      address: sessionData.address!,
       role: sessionData.role,
       status: 'authenticated',
     }
   }
 
-  async signout(c: Context) {
-    const hadSession = !!c.req.session.auth
-
+  signout(c: Context): SignOutResponseType {
     c.req.session.destroy()
-
-    console.log('signout completed, had session:', hadSession)
 
     return { success: true }
   }

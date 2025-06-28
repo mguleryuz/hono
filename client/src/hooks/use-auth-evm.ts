@@ -1,11 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import type { Auth } from '@/types'
 import { getAuthMethod } from '@/utils/env'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useQuery } from '@tanstack/react-query'
 import { useAccount } from 'wagmi'
+
+import { useEffectQuery } from './use-tanstack-effect'
 
 const authMethod = getAuthMethod()
 const isAuthEvmEnabled = authMethod === 'evm'
@@ -29,56 +29,36 @@ export function useAuthEvm() {
     }
   }, [isConnected, signatureRequired, openConnectModal, connectModalOpen])
 
-  const authQuery = useQuery({
-    queryKey: ['auth-evm', isConnected],
-    queryFn: async () => {
-      const res = await fetch('/api/auth/evm/session', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-      })
-
-      if (!res.ok) {
-        return {
-          address: null,
-          role: null,
-          status: 'unauthenticated' as any,
-        }
-      }
-
-      const json = <
-        | Auth
-        | {
-            address: null
-            role: null
-            status: 'unauthenticated'
-          }
-      >await res.json()
-
-      return json
-    },
-    initialData: {
-      address: null,
-      role: null,
-      status: 'unauthenticated',
-    },
-    enabled: isAuthEvmEnabled && isConnected,
-    refetchOnWindowFocus: false,
-    retry: false,
-  })
+  const sessionQuery = useEffectQuery(
+    'evmAuth',
+    'session',
+    {},
+    {
+      initialData: {
+        id: '',
+        address: '',
+        role: 'USER',
+        status: 'unauthenticated',
+      },
+      includeCredentials: true,
+      retry: false,
+      refetchOnWindowFocus: false,
+      enabled: isAuthEvmEnabled && isConnected,
+    }
+  )
 
   // Check if signature is required: connected but not authenticated
   React.useEffect(() => {
     if (
       isConnected &&
-      authQuery.data.status === 'unauthenticated' &&
-      !authQuery.isLoading
+      sessionQuery.data.status === 'unauthenticated' &&
+      !sessionQuery.isLoading
     ) {
       setSignatureRequired(true)
-    } else if (authQuery.data.status === 'authenticated') {
+    } else if (sessionQuery.data.status === 'authenticated') {
       setSignatureRequired(false)
     }
-  }, [isConnected, authQuery.data.status, authQuery.isLoading])
+  }, [isConnected, sessionQuery.data.status, sessionQuery.isLoading])
 
   // Reset signature required when disconnected
   React.useEffect(() => {
@@ -88,14 +68,16 @@ export function useAuthEvm() {
   }, [isConnected])
 
   return {
-    ...authQuery,
+    ...sessionQuery,
     signatureRequired,
     data: {
-      ...authQuery.data,
+      ...sessionQuery.data,
       status:
-        authQuery.isFetching || authQuery.isLoading || authQuery.isRefetching
+        sessionQuery.isFetching ||
+        sessionQuery.isLoading ||
+        sessionQuery.isRefetching
           ? 'loading'
-          : authQuery.data.status,
+          : sessionQuery.data.status,
     },
   }
 }

@@ -17,7 +17,7 @@ export interface RateLimitInfo {
   endpoint?: string
 }
 
-export class TwitterService {
+export class XService {
   private readonly _client: TwitterApi | undefined
   private _userClientsCache: CacheContainer
   private _rateLimitPlugin: TwitterApiRateLimitPlugin
@@ -68,7 +68,7 @@ export class TwitterService {
       )
 
       if (cachedClient) {
-        logger.info(`Returning cached client for user ${user.twitterUsername}`)
+        logger.info(`Returning cached client for user ${user.twitter_username}`)
         return cachedClient
       }
 
@@ -134,7 +134,7 @@ export class TwitterService {
 
     if (!accessToken) {
       logger.error(
-        `[AUTH ERROR] Invalid or missing access token for user ${user.twitterUsername || user.id}`
+        `[AUTH ERROR] Invalid or missing access token for user ${user.twitter_username || user.id}`
       )
       return null
     }
@@ -153,7 +153,7 @@ export class TwitterService {
         logger.info(`Successfully authenticated as: ${meResult.data.username}`)
       } else {
         logger.info(
-          `Created Twitter client for user ${user.twitterUsername} without validation`
+          `Created Twitter client for user ${user.twitter_username} without validation`
         )
       }
 

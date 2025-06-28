@@ -83,14 +83,14 @@ export class TwitterRateLimitMongoStore implements ITwitterApiRateLimitStore {
 
       // Try to find the specific endpoint in the user's rate limits
       // First try exact match, then try normalized match
-      let rateLimitEntry = user.twitterRateLimits?.find(
+      let rateLimitEntry = user.twitter_rate_limits?.find(
         (rl) =>
           rl.endpoint === args.endpoint && rl.method === (args.method || 'GET')
       )
 
       // If exact match failed, try with normalized endpoints
       if (!rateLimitEntry) {
-        rateLimitEntry = user.twitterRateLimits?.find(
+        rateLimitEntry = user.twitter_rate_limits?.find(
           (rl) =>
             normalizeEndpoint(rl.endpoint) === normalizedRequestEndpoint &&
             rl.method === (args.method || 'GET')
@@ -179,7 +179,7 @@ export class TwitterRateLimitMongoStore implements ITwitterApiRateLimitStore {
         // Our context fields
         endpoint: endpoint,
         method: method,
-        lastUpdated: new Date(),
+        last_updated: new Date(),
       }
 
       // Update the rate limit list - find and update existing or push new
@@ -207,8 +207,8 @@ export class TwitterRateLimitMongoStore implements ITwitterApiRateLimitStore {
           { twitterRateLimits: 1 }
         ).lean()
 
-        if (userRateLimits?.twitterRateLimits) {
-          const matchingIndex = userRateLimits.twitterRateLimits.findIndex(
+        if (userRateLimits?.twitter_rate_limits) {
+          const matchingIndex = userRateLimits.twitter_rate_limits.findIndex(
             (rl) =>
               normalizeEndpoint(rl.endpoint) === normalizedEndpoint &&
               rl.method === method

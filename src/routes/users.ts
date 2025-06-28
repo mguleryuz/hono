@@ -1,29 +1,27 @@
-import { UserModel, type User } from '@/mongo/user.mongo'
 import { logger } from '@/utils'
 import { Hono } from 'hono'
 
-export type UsersReturnType = Pick<
-  User,
-  | 'address'
-  | 'twitterProfileImageUrl'
-  | 'twitterUsername'
-  | 'twitterDisplayName'
->[]
+import { userService } from '..'
 
 export const users = new Hono()
 
 users.get('/', async (c) => {
   try {
-    const users = await UserModel.find()
-      .sort({ points: -1 })
-      .select(
-        'address twitterUsername twitterDisplayName twitterProfileImageUrl'
-      )
-      .lean()
+    // Get pagination params from query
+    const page = parseInt(c.req.query('page') || '1')
+    const limit = parseInt(c.req.query('limit') || '10')
 
-    return c.json(users)
+    const { users, pagination } = await userService.getPaginatedUsers(
+      page,
+      limit
+    )
+
+    return c.json({
+      users,
+      pagination,
+    })
   } catch (error) {
     logger.error('Error getting all users', error)
-    return c.json([], 500)
+    return c.json({ users: [], pagination: null }, 500)
   }
 })

@@ -90,7 +90,8 @@
     "twitter-api-v2": "^1.24.0",
     "vaul": "^1.1.2",
     "viem": "^2.31.4",
-    "wagmi": "^2.15.6"
+    "wagmi": "^2.15.6",
+    "whatsapp-business": "^1.14.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
