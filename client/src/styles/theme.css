@@ -48,56 +48,81 @@
 
   --radius: 0.5rem;
 
-  @variant dark {
-    --accent: hsl(0 0 100% / 0.03);
-    --accent-foreground: hsl(0 0 100%);
+  /* Wellness gaming theme colors */
+  --wellness-primary: 165 82% 51%; /* Turquoise */
+  --wellness-secondary: 280 68% 60%; /* Purple */
+  --wellness-accent: 142 71% 45%; /* Green */
+  --gaming-accent: 45 93% 47%; /* Gold */
 
-    --background: hsl(220 9% 7%);
-    --background-2: hsl(220 7% 9%);
-    --foreground: hsl(0 0 100%);
+  /* Gradients */
+  --gradient-wellness: linear-gradient(
+    135deg,
+    hsl(var(--wellness-primary)),
+    hsl(var(--wellness-secondary))
+  );
+  --gradient-gaming: linear-gradient(
+    135deg,
+    hsl(var(--wellness-accent)),
+    hsl(var(--gaming-accent))
+  );
+}
 
-    --card: hsl(210 8% 10%);
-    --card-foreground: hsl(0 0 100%);
+/* Dark mode */
+.dark {
+  --accent: hsl(0 0 100% / 0.03);
+  --accent-foreground: hsl(0 0 100%);
 
-    --destructive: hsl(7 87% 56%);
-    --destructive-active: hsl(7 87% 56%);
-    --destructive-foreground: hsl(0 0 100%);
-    --destructive-hover: hsl(10 100% 67%);
+  --background: hsl(220 9% 7%);
+  --background-2: hsl(220 7% 9%);
+  --foreground: hsl(0 0 100%);
 
-    --input: hsl(204 4% 26%);
-    --input-hover: hsl(204 2% 39%);
+  --card: hsl(210 8% 10%);
+  --card-foreground: hsl(0 0 100%);
 
-    --link: hsl(237 73% 68%);
-    --link-active: hsl(233 80% 74%);
-    --link-hover: hsl(233 79% 81%);
+  --destructive: hsl(7 87% 56%);
+  --destructive-active: hsl(7 87% 56%);
+  --destructive-foreground: hsl(0 0 100%);
+  --destructive-hover: hsl(10 100% 67%);
 
-    --muted: hsl(204 3% 61%);
-    --muted-foreground: hsl(0 0 100%);
+  --input: hsl(204 4% 26%);
+  --input-hover: hsl(204 2% 39%);
 
-    --popover: hsl(220 9% 7%);
-    --popover-foreground: hsl(0 0 100%);
+  --link: hsl(237 73% 68%);
+  --link-active: hsl(233 80% 74%);
+  --link-hover: hsl(233 79% 81%);
 
-    --primary: hsl(0 0 100%);
-    --primary-active: hsl(210 4% 69%);
-    --primary-foreground: hsl(220 9% 7%);
-    --primary-hover: hsl(200 17% 93%);
+  --muted: hsl(204 3% 61%);
+  --muted-foreground: hsl(0 0 100%);
 
-    --secondary: hsl(0 0 100% / 0.06);
-    --secondary-active: hsl(0 0 100% / 0.04);
-    --secondary-foreground: hsl(0 0 100%);
-    --secondary-hover: hsl(0 0 100% / 0.08);
+  --popover: hsl(220 9% 7%);
+  --popover-foreground: hsl(0 0 100%);
 
-    --error: hsl(10 100% 67%);
-    --success: hsl(127 67% 42%);
-    --warning: hsl(40 69% 47%);
+  --primary: hsl(0 0 100%);
+  --primary-active: hsl(210 4% 69%);
+  --primary-foreground: hsl(220 9% 7%);
+  --primary-hover: hsl(200 17% 93%);
 
-    --border: hsl(216 6% 17%);
-    --ring: hsl(237 73% 68%);
+  --secondary: hsl(0 0 100% / 0.06);
+  --secondary-active: hsl(0 0 100% / 0.04);
+  --secondary-foreground: hsl(0 0 100%);
+  --secondary-hover: hsl(0 0 100% / 0.08);
 
-    --chart-1: hsl(155 78% 55%);
-    --chart-2: hsl(204 4% 26%);
-    --chart-3: hsl(155 78% 55%);
-    --chart-4: hsl(7 87% 56%);
-    --chart-5: hsl(127 67% 42%);
-  }
+  --error: hsl(10 100% 67%);
+  --success: hsl(127 67% 42%);
+  --warning: hsl(40 69% 47%);
+
+  --border: hsl(216 6% 17%);
+  --ring: hsl(237 73% 68%);
+
+  --chart-1: hsl(155 78% 55%);
+  --chart-2: hsl(204 4% 26%);
+  --chart-3: hsl(155 78% 55%);
+  --chart-4: hsl(7 87% 56%);
+  --chart-5: hsl(127 67% 42%);
+
+  /* Dark mode wellness colors */
+  --wellness-primary: 165 82% 51%;
+  --wellness-secondary: 280 68% 70%;
+  --wellness-accent: 142 71% 55%;
+  --gaming-accent: 45 93% 57%;
 }

@@ -3,7 +3,7 @@ FROM oven/bun:latest AS base
 WORKDIR /usr/src/app
 
 #--------------------------------
-# Install top level dependencies stage
+# Install stage
 
 FROM base AS install
 # Combine RUN commands and only install necessary packages
@@ -14,13 +14,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && bun add -g node-gyp@latest
 
-# Copy only package files first to leverage cache
+# Copy package files and workspace structure first to leverage cache
 COPY package.json bun.lock ./
+COPY packages/sendpulse-whatsapp/package.json ./packages/sendpulse-whatsapp/
 
 # Install all dependencies once instead of twice
-RUN bun install --frozen-lockfile \
+# Skip setup script in Docker builds
+RUN RUN_DEV_SETUP=false bun install --frozen-lockfile \
     && mv node_modules dev_modules \
-    && bun install --frozen-lockfile --omit=dev --omit=optional \
+    && RUN_DEV_SETUP=false bun install --frozen-lockfile --omit=dev --omit=optional \
     && mv node_modules prod_modules
 
 #--------------------------------
@@ -28,21 +30,22 @@ RUN bun install --frozen-lockfile \
 
 FROM base AS build
 COPY --from=install /usr/src/app/dev_modules ./node_modules
-COPY package.json tsconfig.json tsconfig.build.json ./
-COPY src ./src
+COPY package.json ./
 COPY client ./client
-RUN bun run build
+COPY src ./src
+RUN bun run build:client
 
 #--------------------------------
 # Production stage
 FROM base AS release
 WORKDIR /usr/src/app
 COPY --from=install /usr/src/app/prod_modules ./node_modules
-COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/client/dist ./client/dist
+COPY packages ./packages
+COPY src ./src
 COPY static ./static
+COPY tsconfig.json ./tsconfig.json
 
 USER bun
 EXPOSE 8080/tcp
-ENV NODE_ENV=production
-CMD ["bun", "dist/index.js"]
+CMD ["sh", "-c", "NODE_ENV=production bun src/index.ts"]

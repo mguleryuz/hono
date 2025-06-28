@@ -28,7 +28,8 @@ read CHOICE
 function build_image() {
     echo "Enter the tag for the image:"
     read TAG
-    export $(cat .env | xargs)
+    # Export only valid environment variables from .env file (exclude comments and empty lines)
+    export $(grep -v '^#' .env | grep -v '^$' | xargs)
     docker build -t $PROJECT_NAME:$TAG .
 }
 

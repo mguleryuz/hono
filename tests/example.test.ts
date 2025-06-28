@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 
-import { writeLog } from '../tools'
+import { writeLog } from '../scripts'
 
 describe('Should give a hint about the bun tests', () => {
   it('should write an exemple', async () => {

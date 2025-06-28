@@ -87,7 +87,7 @@ This will show you various Docker operations like:
 │ ├── services/ # Services
 │ ├── types/ # Types
 │ └── jobs/ # Background jobs
-├── tools/ # Development tools
+├── scripts/ # Development scripts
 ├── tests/ # Tests
 ├── .github/ # GitHub Actions workflows
 └── docker.sh # Docker management script

@@ -1,21 +1,119 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
+
+    <!-- Preload critical fonts -->
+    <link
+      rel="preload"
+      href="/fonts/Archivo-Regular.ttf"
+      as="font"
+      type="font/ttf"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preload"
+      href="/fonts/PowerGrotesk-Regular.ttf"
+      as="font"
+      type="font/ttf"
+      crossorigin="anonymous"
+    />
+
+    <!-- Preconnect to external origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+
+    <!-- Open Graph tags -->
     <meta property="og:title" content="<og_title>" />
     <meta property="og:description" content="<og_description>" />
     <meta property="og:image" content="/static/og-image.png" />
+
+    <!-- Twitter Card tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:creator" content="@<twitter_handle>" />
+    <meta name="twitter:creator" content="<twitter_creator>" />
     <meta name="twitter:title" content="<twitter_title>" />
     <meta name="twitter:description" content="<twitter_description>" />
     <meta name="twitter:image" content="/static/og-image.png" />
-    <title>twitter_title</title>
+
+    <!-- SEO Meta tags -->
+    <meta name="description" content="<description>" />
+    <meta name="keywords" content="<keyword1, keyword2>, keyword3>" />
+
+    <title>title</title>
+
+    <!-- Theme initialization script - prevents flash of unstyled content -->
+    <script>
+      ;(function () {
+        const stored = localStorage.getItem('theme')
+        const theme =
+          stored && ['light', 'dark', 'system'].includes(stored)
+            ? stored
+            : 'system'
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+          .matches
+          ? 'dark'
+          : 'light'
+        const resolved = theme === 'system' ? systemTheme : theme
+
+        // Add no-transitions class to prevent initial transition flash
+        document.documentElement.classList.add('no-transitions', resolved)
+
+        // Remove no-transitions class after a brief delay
+        setTimeout(() => {
+          document.documentElement.classList.remove('no-transitions')
+        }, 100)
+      })()
+    </script>
+
+    <!-- Inline critical CSS for faster initial paint -->
+    <style>
+      /* Critical CSS - prevent layout shift and faster initial render */
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+      }
+
+      #app {
+        min-height: 100vh;
+      }
+
+      /* Prevent CLS from sidebar - use CSS variable */
+      [data-slot='sidebar-inner'] {
+        transition: none;
+      }
+
+      /* Font-face definitions with font-display: swap for better performance */
+      @font-face {
+        font-family: 'Archivo';
+        src: url('/fonts/Archivo-Regular.ttf') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'PowerGrotesk';
+        src: url('/fonts/PowerGrotesk-Regular.ttf') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
   </head>
 
   <body>
