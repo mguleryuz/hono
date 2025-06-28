@@ -95,22 +95,12 @@ export class AuthEvmService {
       }
     }
 
-    console.log('SESSION AT VERIFY:', {
-      address: c.req.session.address,
-      role: c.req.session.role,
-    })
-
     // Return the new Session
     return { success: true }
   }
 
   async session(c: Context): Promise<SessionType> {
     const sessionData = c.req.session
-
-    console.log({
-      address: sessionData?.address,
-      role: sessionData?.role,
-    })
 
     if (!sessionData?.address || !sessionData?.role) {
       throw new HTTPException(401, {
