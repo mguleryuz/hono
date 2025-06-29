@@ -1,49 +1,40 @@
-import { ApiSecretSchema, type User } from '@/mongo'
-import { mongooseToEffectSchema } from '@/utils'
+import { UserSchema } from '@/schemas'
 import { HttpApiEndpoint, HttpApiGroup } from '@effect/platform'
 import { Schema } from 'effect'
 
 import { PaginationResponse } from './base.schema'
 
-export const ApiSecret = mongooseToEffectSchema(ApiSecretSchema)
-
-export const TwitterRateLimit = Schema.Struct({
-  endpoint: Schema.String,
-  method: Schema.String,
-  last_updated: Schema.Date,
-})
-
 export const UsersQueryParams = Schema.Struct({
-  page: Schema.NumberFromString,
-  limit: Schema.NumberFromString,
+  page: Schema.NumberFromString.annotations({
+    title: 'Page Number',
+    description: 'The page number for pagination (1-based)',
+    examples: [1, 2, 3],
+  }),
+  limit: Schema.NumberFromString.annotations({
+    title: 'Page Limit',
+    description: 'Number of items per page',
+    examples: [10, 25, 50],
+  }),
+}).annotations({
+  title: 'Users Query Parameters',
+  description: 'Query parameters for fetching users list',
 })
 
-export const UserResponse = Schema.Struct({
-  role: Schema.Literal('USER', 'ADMIN', 'SUPER'),
-  address: Schema.optional(
-    Schema.Union(Schema.TemplateLiteral('0x', Schema.String), Schema.String)
-  ),
-  whatsapp_phone: Schema.optional(Schema.String),
-  api_secrets: Schema.Array(ApiSecret),
-  web_hook_url: Schema.optional(Schema.String),
-  twitter_access_token: Schema.optional(Schema.String),
-  twitter_refresh_token: Schema.optional(Schema.String),
-  twitter_access_token_expires_at: Schema.optional(Schema.Date),
-  twitter_user_id: Schema.optional(Schema.String),
-  twitter_username: Schema.optional(Schema.String),
-  twitter_display_name: Schema.optional(Schema.String),
-  twitter_profile_image_url: Schema.optional(Schema.String),
-  twitter_rate_limits: Schema.optional(Schema.Array(TwitterRateLimit)),
-
-  createdAt: Schema.Date,
-  updatedAt: Schema.Date,
-} satisfies Record<keyof User, any>)
-
-export const PublicUserResponse = UserResponse.omit('api_secrets')
+export const PublicUserResponse = UserSchema.omit('api_secrets').annotations({
+  title: 'Public User',
+  description: 'User information without sensitive data like API secrets',
+})
 
 export const UsersResponse = Schema.Struct({
-  users: Schema.Array(PublicUserResponse),
-  pagination: PaginationResponse,
+  users: Schema.Array(PublicUserResponse).annotations({
+    description: 'Array of user objects',
+  }),
+  pagination: PaginationResponse.annotations({
+    description: 'Pagination metadata',
+  }),
+}).annotations({
+  title: 'Users List Response',
+  description: 'Response containing paginated list of users',
 })
 
 export const usersGroup = HttpApiGroup.make('users')

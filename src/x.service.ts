@@ -1,4 +1,5 @@
 import { TwitterRateLimitMongoStore } from '@/mongo/helpers'
+import type { User } from '@/types'
 import { getXClientId, getXClientSecret, logger } from '@/utils'
 import { TwitterApiRateLimitPlugin } from '@twitter-api-v2/plugin-rate-limit'
 import { CacheContainer } from 'node-ts-cache'
@@ -6,7 +7,6 @@ import { MemoryStorage } from 'node-ts-cache-storage-memory'
 import { TwitterApi } from 'twitter-api-v2'
 
 import { authXService } from '.'
-import type { User } from './types'
 
 // Simple rate limit response used throughout the app
 export interface RateLimitInfo {

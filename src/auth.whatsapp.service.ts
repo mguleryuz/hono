@@ -1,3 +1,9 @@
+import { UserModel } from '@/mongo'
+import type {
+  GetCleanSuccessType,
+  GetRequestParams,
+  InternalSession,
+} from '@/types'
 import {
   getWhatsAppAccessToken,
   getWhatsAppBusinessAccountId,
@@ -9,13 +15,6 @@ import debug from 'debug'
 import type { Context } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { WABAClient } from 'whatsapp-business'
-
-import { UserModel } from './mongo'
-import type {
-  GetCleanSuccessType,
-  GetRequestParams,
-  InternalSession,
-} from './types'
 
 const d = debug('moai:auth-whatsapp')
 

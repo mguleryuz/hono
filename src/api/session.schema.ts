@@ -1,6 +1,5 @@
+import { XRateLimitSchema } from '@/schemas'
 import { Schema } from 'effect'
-
-import { TwitterRateLimit } from './users.schema'
 
 /**
  * @description Base session
@@ -32,7 +31,7 @@ export const XSession = Schema.Struct({
   twitter_username: Schema.String,
   twitter_display_name: Schema.String,
   twitter_profile_image_url: Schema.String,
-  twitter_rate_limits: Schema.Array(TwitterRateLimit),
+  twitter_rate_limits: Schema.Array(XRateLimitSchema),
 })
 
 /**
@@ -62,7 +61,7 @@ export const CombinedSession = Schema.Struct({
   twitter_username: Schema.String,
   twitter_display_name: Schema.String,
   twitter_profile_image_url: Schema.String,
-  twitter_rate_limits: TwitterRateLimit,
+  twitter_rate_limits: XRateLimitSchema,
 })
 
 /**

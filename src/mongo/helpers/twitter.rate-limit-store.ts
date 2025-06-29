@@ -1,4 +1,5 @@
-import { UserModel, type TwitterRateLimitWithContext } from '@/mongo'
+import { UserModel } from '@/mongo'
+import type { XRateLimitWithContext } from '@/types'
 import { logger } from '@/utils'
 import type {
   ITwitterApiRateLimitGetArgs,
@@ -167,7 +168,7 @@ export class TwitterRateLimitMongoStore implements ITwitterApiRateLimitStore {
 
     try {
       // Create rate limit data that includes both Twitter API fields and our context
-      const rateLimitData: TwitterRateLimitWithContext = {
+      const rateLimitData: XRateLimitWithContext = {
         // Twitter API fields
         limit: rateLimit.limit,
         remaining: rateLimit.remaining,

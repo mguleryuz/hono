@@ -1,5 +1,5 @@
+import type { ApiSecret, User, XRateLimitWithContext } from '@/schemas'
 import { model, Schema } from 'mongoose'
-import type { TwitterRateLimit as TwitterApiRateLimit } from 'twitter-api-v2'
 
 // ----------------------------------------------------------------------------
 // ROLE
@@ -10,62 +10,10 @@ export enum EUserRole {
   SUPER = 'SUPER',
 }
 
-export type UserRole = keyof typeof EUserRole
-
-// ----------------------------------------------------------------------------
-// API
-
-export type ApiSecret = {
-  title: string
-  secret: string
-
-  createdAt: Date
-  updatedAt: Date
-}
-
-// ----------------------------------------------------------------------------
-// USER
-
-// Extend the official TwitterRateLimit type with our context fields
-export interface TwitterRateLimitWithContext extends TwitterApiRateLimit {
-  // Context fields for our application
-  endpoint: string
-  method: string
-  last_updated: Date
-}
-
-export type User = {
-  role: UserRole
-
-  // EVM
-  address?: string
-
-  // Twitter/X
-  twitter_access_token?: string
-  twitter_refresh_token?: string
-  twitter_access_token_expires_at?: Date
-
-  twitter_user_id?: string
-  twitter_username?: string
-  twitter_display_name?: string
-  twitter_profile_image_url?: string
-  twitter_rate_limits?: TwitterRateLimitWithContext[]
-
-  // WhatsApp
-  whatsapp_phone?: string
-
-  // Infra
-  api_secrets: ApiSecret[]
-  web_hook_url?: string
-
-  createdAt: Date
-  updatedAt: Date
-}
-
 // ----------------------------------------------------------------------------
 // SCHEMAS
 
-export const ApiSecretSchema = new Schema(
+export const ApiSecretSchema = new Schema<ApiSecret>(
   {
     title: {
       type: String,
@@ -80,7 +28,7 @@ export const ApiSecretSchema = new Schema(
     _id: false,
     timestamps: true,
   }
-) satisfies Schema<ApiSecret>
+)
 
 // Schema for the SingleTwitterRateLimit structure (used in main and day limits)
 const SingleTwitterRateLimitSchema = {
@@ -98,7 +46,7 @@ const SingleTwitterRateLimitSchema = {
   },
 }
 
-export const TwitterRateLimitSchema = new Schema(
+export const TwitterRateLimitSchema = new Schema<XRateLimitWithContext>(
   {
     // Standard rate limit fields (SingleTwitterRateLimit)
     ...SingleTwitterRateLimitSchema,
@@ -126,9 +74,9 @@ export const TwitterRateLimitSchema = new Schema(
   {
     _id: false,
   }
-) satisfies Schema<TwitterRateLimitWithContext>
+)
 
-export const UserSchema = new Schema(
+export const UserSchema = new Schema<User>(
   {
     role: {
       type: String,
@@ -187,7 +135,7 @@ export const UserSchema = new Schema(
     },
   },
   { timestamps: true }
-) satisfies Schema<User>
+)
 
 // ----------------------------------------------------------------------------
 // MODEL
