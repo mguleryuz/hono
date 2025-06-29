@@ -2,10 +2,10 @@ import type { GetRequestParams, GetReturnType } from '@/types'
 import { HttpApi, HttpApiClient } from '@effect/platform'
 import { Effect, Schema } from 'effect'
 
-import { evmAuthGroup } from './auth.evm.schema'
-import { whatsappAuthGroup } from './auth.whatsapp.schema'
-import { twitterAuthGroup } from './auth.x.schema'
-import { usersGroup } from './users.schema'
+import { evmAuthGroup } from './schemas/auth.evm.schema'
+import { whatsappAuthGroup } from './schemas/auth.whatsapp.schema'
+import { twitterAuthGroup } from './schemas/auth.x.schema'
+import { usersGroup } from './schemas/users.schema'
 
 const ErrorResponse = Schema.Struct({
   message: Schema.String,

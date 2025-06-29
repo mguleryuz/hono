@@ -216,12 +216,12 @@ export class AuthWhatsAppService {
         whatsapp_phone,
       }).lean()
 
-      const state = {
+      const state: InternalSession = {
         mongo_id: existingUser?._id.toString(),
         role: 'USER',
         whatsapp_phone,
         status: 'authenticated',
-      } satisfies InternalSession
+      }
 
       // Update existing user or create new user
       if (existingUser) {
@@ -258,7 +258,7 @@ export class AuthWhatsAppService {
 
       const response: SessionType = {
         mongo_id: state.mongo_id!,
-        role: state.role,
+        role: state.role!,
         whatsapp_phone: state.whatsapp_phone,
         status: 'authenticated',
       }

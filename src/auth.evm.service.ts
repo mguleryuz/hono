@@ -62,14 +62,14 @@ export class AuthEvmService {
       address,
     }).lean()
 
-    const state = {
+    const state: InternalSession = {
       mongo_id: existingUser?._id.toString(),
       role: 'USER',
 
       address: existingUser?.address,
       status: 'authenticated',
       nonce,
-    } satisfies InternalSession
+    }
 
     // Update State and handle session
     if (!!existingUser) {

@@ -1,11 +1,11 @@
 import type { Client } from '@/api'
-import type { CombinedSession } from '@/api/session.schema'
+import type { CombinedSession } from '@/schemas'
 import type { HttpClientResponse } from '@effect/platform'
-import type { Effect, Schema } from 'effect'
+import type { Effect } from 'effect'
 import type { DeepMutable } from 'effect/Types'
 
 export type InternalSession = Partial<
-  DeepMutable<Schema.Schema.Type<typeof CombinedSession>>
+  DeepMutable<typeof CombinedSession.Type>
 > & {
   nonce?: string
   whatsapp_otp?: number

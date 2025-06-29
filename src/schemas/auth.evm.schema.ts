@@ -1,7 +1,6 @@
+import * as SessionSchema from '@/schemas/session.schema'
 import { HttpApiEndpoint, HttpApiGroup } from '@effect/platform'
 import { Schema } from 'effect'
-
-import * as SessionSchema from './session.schema'
 
 export const VerifyPayload = Schema.Struct({
   message: Schema.String,
