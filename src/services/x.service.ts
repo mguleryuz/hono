@@ -65,16 +65,10 @@ export class XService {
   }
 
   get client() {
-    if (!this._client) {
-      throw new Error('Client not initialized')
-    }
     return this._client
   }
 
   get appClient() {
-    if (!this._appClient) {
-      throw new Error('App client not initialized')
-    }
     return this._appClient
   }
 
