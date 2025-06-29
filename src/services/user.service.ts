@@ -1,6 +1,6 @@
 import type { GetCleanSuccessType } from '@/types'
 
-import { UserModel } from './mongo/user.mongo'
+import { UserModel } from '../mongo/user.mongo'
 
 type UsersResponse = GetCleanSuccessType<'users', ''>
 

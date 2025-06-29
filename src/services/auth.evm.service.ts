@@ -12,7 +12,7 @@ import {
   type SiweMessage,
 } from 'viem/siwe'
 
-import { UserModel } from './mongo'
+import { UserModel } from '../mongo'
 
 type VerifyPayloadType = GetRequestParams<'evmAuth', 'verify'>['payload']
 type VerifyResponseType = GetCleanSuccessType<'evmAuth', 'verify'>

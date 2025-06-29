@@ -6,7 +6,7 @@ import { CacheContainer } from 'node-ts-cache'
 import { MemoryStorage } from 'node-ts-cache-storage-memory'
 import { TwitterApi } from 'twitter-api-v2'
 
-import { authXService } from '.'
+import { authXService } from '..'
 
 // Simple rate limit response used throughout the app
 export interface RateLimitInfo {

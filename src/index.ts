@@ -1,9 +1,10 @@
 // Dependencies
 
 // Services
-import { BucketService } from '@/bucket.service'
+
 // Handlers
 import { Routes } from '@/routes'
+import { BucketService } from '@/services/bucket.service'
 import { logger as log } from '@/utils/logger'
 // Utils
 import { connectDb, sessionMiddleware } from '@/utils/server'
@@ -12,11 +13,13 @@ import { compress } from 'hono-compress'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 
-import { AuthEvmService } from './auth.evm.service'
-import { AuthWhatsAppService } from './auth.whatsapp.service'
-import { AuthXService } from './auth.x.service'
-import { UserService } from './user.service'
-import { XService } from './x.service'
+import {
+  AuthEvmService,
+  AuthWhatsAppService,
+  AuthXService,
+  UserService,
+  XService,
+} from './services'
 
 // ------------------------------------------------------------
 // Server
