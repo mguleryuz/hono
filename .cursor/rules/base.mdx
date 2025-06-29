@@ -1,4 +1,191 @@
-- never commit without asking for permission
-- always use src/routes ,src/api, src/services, src/schemas to add new routes and their corresponding services and schemas
-- always use and if not present create a new hook in client/src/hooks to handle the api flows
-- always use tanstack-effect to handle the api flows
+# Agent Rules and Guidelines
+
+## Project Overview
+
+This is a full-stack TypeScript application with:
+
+- **Backend**: Hono server with MongoDB (located in `/src`)
+- **Frontend**: React + Vite client with TanStack Router (located in `/client`)
+- **Runtime**: Bun (for both development and testing)
+- **Package Manager**: Bun
+
+## Project Structure
+
+```
+/
+├── src/                    # Backend server code
+│   ├── api.ts             # API initialization
+│   ├── routes/            # Route handlers
+│   ├── services/          # Business logic
+│   ├── schemas/           # Validation schemas
+│   ├── mongo/             # Database models and helpers
+│   ├── jobs/              # Background jobs
+│   ├── types/             # TypeScript type definitions
+│   └── utils/             # Utilities and helpers
+├── client/                # Frontend React application
+│   └── src/
+│       ├── routes/        # TanStack Router routes
+│       ├── components/    # React components
+│       ├── hooks/         # Custom React hooks
+│       ├── providers/     # Context providers
+│       └── utils/         # Client utilities
+├── tests/                 # Test files
+└── packages/              # Internal packages
+```
+
+## Development Workflow
+
+### API Development
+
+1. **Always** create new routes in `src/routes/`
+2. **Always** create corresponding services in `src/services/`
+3. **Always** create validation schemas in `src/schemas/`
+4. **Always** create custom hooks in `client/src/hooks/` for API flows
+5. **Always** use `@c/hooks/tanstack-effect` for handling API flows
+
+### Important Rules
+
+- **Never** commit without asking for permission
+- **Always** ask before making architectural decisions
+- **Prefer** e2e tests over unit tests unless there's a good reason
+
+## Code Standards
+
+### Naming Conventions
+
+| Type                           | Convention         | Example                          |
+| ------------------------------ | ------------------ | -------------------------------- |
+| **Files & Folders**            | kebab-case         | `user-profile.ts`, `use-auth.ts` |
+| **Functions & Variables**      | camelCase          | `getUserData`, `userName`        |
+| **Components, Classes, Types** | PascalCase         | `UserProfile`, `ApiResponse`     |
+| **Database Elements**          | snake_case         | `user_profiles`, `created_at`    |
+| **Generic Types**              | T prefix           | `TUserData`, `TApiResponse`      |
+| **Type Parameters**            | `<type>Params`     | `GetUserParams`                  |
+| **Return Types**               | `<type>ReturnType` | `GetUserReturnType`              |
+
+### TypeScript Guidelines
+
+- **Always** be type-safe - no `any` types
+- **Never** duplicate type definitions
+- **Avoid** default exports unless necessary
+- **Use** explicit return types for functions
+
+### Documentation Standards
+
+Use JSDoc for all types and major functions:
+
+```typescript
+/**
+ * @description Retrieves user data by ID
+ * @param {string} userId - The unique identifier of the user
+ * @returns {Promise<User>} The user object
+ * @example
+ * const user = await getUserById('123')
+ * console.log(user.name) // 'John Doe'
+ */
+```
+
+## Frontend Development
+
+### React Best Practices
+
+- **Use** functional components with hooks
+- **Use** custom hooks for reusable logic (`client/src/hooks/`)
+- **Follow** React hooks rules (proper dependencies, avoid infinite loops)
+- **Keep** components small and focused (single responsibility)
+- **Use** React.memo() for expensive computations
+- **Implement** proper error boundaries
+
+### State Management
+
+- **Server State**: Use `@tanstack/react-query`
+  - `useQuery` for data fetching
+  - `useMutation` for data mutations
+  - Leverage caching and invalidation
+- **Client State**: Use Zustand
+  - Keep stores simple and focused
+  - Use slices for complex state
+  - Use `persist` middleware when needed
+- **Local State**: Use React Context for component trees
+- **Avoid** prop drilling - use context or state management
+
+### UI/UX Requirements
+
+- **Always** design mobile-first
+- **Ensure** full responsiveness across all devices
+- **Use** shadcn/ui components: `bunx --bun shadcn@latest`
+- **Follow** modern UX best practices
+- **Use** `@tanstack/react-form` (not react-hook-form)
+- **Implement** accessibility:
+  - Semantic HTML elements
+  - Proper ARIA labels
+  - Keyboard navigation support
+
+## Backend Development
+
+### API Design
+
+- **Use** RESTful conventions
+- **Validate** all inputs with schemas
+- **Handle** errors gracefully
+- **Return** consistent response formats
+
+### Database Conventions
+
+- **Use** MongoDB memory server for tests
+- **Follow** snake_case for all database fields
+- **Create** proper indexes for performance
+- **Use** transactions where appropriate
+
+## Testing Guidelines
+
+### General Principles
+
+- **Never** use mocks - test against actual implementations
+- **Create** tests in `./tests/` directory
+- **Only** test critical functionality
+- **Ensure** tests validate actual behavior
+- **Use** MongoDB memory server for database tests
+
+### Testing with Bun
+
+```typescript
+import { describe, expect, it } from 'bun:test'
+
+describe('Feature', () => {
+  it('should work correctly', () => {
+    // Test implementation
+  })
+})
+```
+
+Run tests: `bun test`
+
+## Development Environment
+
+### Commands
+
+- **Install dependencies**: `bun install`
+- **Run tests**: `bun test`
+- **Add UI components**: `bunx --bun shadcn@latest add <component>`
+
+### Code Quality
+
+- **Be** efficient - avoid unnecessary dependencies
+- **Reuse** code and components
+- **Follow** DRY principles
+- **Write** clean, readable code
+
+## Commit Standards
+
+Follow commitlint conventions:
+
+- `feat:` New features
+- `fix:` Bug fixes
+- `docs:` Documentation changes
+- `style:` Code style changes
+- `refactor:` Code refactoring
+- `test:` Test additions/changes
+- `chore:` Maintenance tasks
+
+Keep messages short and descriptive.

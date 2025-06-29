@@ -1,11 +1,10 @@
-import { UserModel } from '@/mongo'
-import type { XRateLimitWithContext } from '@/types'
 import { logger } from '@/utils'
 import type {
   ITwitterApiRateLimitGetArgs,
   ITwitterApiRateLimitSetArgs,
   ITwitterApiRateLimitStore,
 } from '@twitter-api-v2/plugin-rate-limit'
+import { model, Schema } from 'mongoose'
 import type { TwitterRateLimit as TwitterApiRateLimit } from 'twitter-api-v2'
 
 // Map of API URL patterns to help with normalization
@@ -17,6 +16,76 @@ const API_PREFIXES = {
   'https://upload.twitter.com/1.1/': true,
   'https://stream.twitter.com/1.1/': true,
 }
+
+// ----------------------------------------------------------------------------
+// SCHEMA DEFINITIONS
+
+// Schema for the SingleTwitterRateLimit structure (used in main and day limits)
+const SingleTwitterRateLimitSchema = {
+  limit: {
+    type: Number,
+    required: true,
+  },
+  remaining: {
+    type: Number,
+    required: true,
+  },
+  reset: {
+    type: Number, // Unix timestamp in seconds
+    required: true,
+  },
+}
+
+// Schema for the rate limit document
+const TwitterRateLimitDocumentSchema = new Schema(
+  {
+    // User reference
+    user_id: {
+      type: String,
+      required: true,
+      index: true,
+    },
+
+    // Standard rate limit fields
+    ...SingleTwitterRateLimitSchema,
+
+    // Day limit fields (nested SingleTwitterRateLimit)
+    day: {
+      type: SingleTwitterRateLimitSchema,
+      required: false,
+    },
+
+    // Context fields
+    endpoint: {
+      type: String,
+      required: true,
+    },
+    method: {
+      type: String,
+      required: true,
+      default: 'GET',
+    },
+    last_updated: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    timestamps: true,
+  }
+)
+
+// Create compound index for efficient lookups
+TwitterRateLimitDocumentSchema.index({ user_id: 1, endpoint: 1, method: 1 })
+
+// Create the model
+const TwitterRateLimitModel = model(
+  'twitter_rate_limits',
+  TwitterRateLimitDocumentSchema
+)
+
+// ----------------------------------------------------------------------------
+// HELPER FUNCTIONS
 
 /**
  * Normalizes Twitter API endpoints by handling different API URL patterns
@@ -38,6 +107,9 @@ function normalizeEndpoint(endpoint: string): string {
   // If no known prefix is found, return the full endpoint
   return endpoint
 }
+
+// ----------------------------------------------------------------------------
+// STORE IMPLEMENTATION
 
 /**
  * Custom rate limit store that persists rate limits to MongoDB
@@ -72,67 +144,67 @@ export class TwitterRateLimitMongoStore implements ITwitterApiRateLimitStore {
     }
 
     try {
-      const user = await UserModel.findById(
-        this.currentUserId,
-        'twitterRateLimits'
-      ).lean()
-
-      if (!user) return undefined
-
       // Normalize the requested endpoint for comparison
       const normalizedRequestEndpoint = normalizeEndpoint(args.endpoint)
+      const method = args.method || 'GET'
 
-      // Try to find the specific endpoint in the user's rate limits
-      // First try exact match, then try normalized match
-      let rateLimitEntry = user.x_rate_limits?.find(
-        (rl) =>
-          rl.endpoint === args.endpoint && rl.method === (args.method || 'GET')
-      )
+      // Try to find the specific endpoint in the rate limits collection
+      // First try exact match
+      let rateLimitDoc = await TwitterRateLimitModel.findOne({
+        user_id: this.currentUserId,
+        endpoint: args.endpoint,
+        method: method,
+      }).lean()
 
       // If exact match failed, try with normalized endpoints
-      if (!rateLimitEntry) {
-        rateLimitEntry = user.x_rate_limits?.find(
-          (rl) =>
-            normalizeEndpoint(rl.endpoint) === normalizedRequestEndpoint &&
-            rl.method === (args.method || 'GET')
-        )
+      if (!rateLimitDoc) {
+        // Find all rate limits for this user and check normalized endpoints
+        const userRateLimits = await TwitterRateLimitModel.find({
+          user_id: this.currentUserId,
+          method: method,
+        }).lean()
+
+        rateLimitDoc =
+          userRateLimits.find(
+            (rl) => normalizeEndpoint(rl.endpoint) === normalizedRequestEndpoint
+          ) || null
       }
 
-      if (rateLimitEntry && rateLimitEntry.reset) {
+      if (rateLimitDoc && rateLimitDoc.reset) {
         // Convert reset timestamp to milliseconds for comparison
-        const resetTimeMs = rateLimitEntry.reset * 1000
+        const resetTimeMs = rateLimitDoc.reset * 1000
 
         // Check if day limit is reached
         const isDayLimited =
-          rateLimitEntry.day?.remaining === 0 &&
-          rateLimitEntry.day?.reset &&
-          rateLimitEntry.day.reset * 1000 > Date.now()
+          rateLimitDoc.day?.remaining === 0 &&
+          rateLimitDoc.day?.reset &&
+          rateLimitDoc.day.reset * 1000 > Date.now()
 
         // Check if standard limit is reached
         const isStandardLimited =
-          Date.now() < resetTimeMs && rateLimitEntry.remaining === 0
+          Date.now() < resetTimeMs && rateLimitDoc.remaining === 0
 
         // If either limit is still active, return the rate limit info
         if (isStandardLimited || isDayLimited) {
           // Create the API rate limit object
           const apiRateLimit: TwitterApiRateLimit = {
-            limit: rateLimitEntry.limit,
-            remaining: rateLimitEntry.remaining,
-            reset: rateLimitEntry.reset,
+            limit: rateLimitDoc.limit,
+            remaining: rateLimitDoc.remaining,
+            reset: rateLimitDoc.reset,
           }
 
           // Add day limit info if available
-          if (rateLimitEntry.day) {
+          if (rateLimitDoc.day) {
             apiRateLimit.day = {
-              limit: rateLimitEntry.day.limit,
-              remaining: rateLimitEntry.day.remaining,
-              reset: rateLimitEntry.day.reset,
+              limit: rateLimitDoc.day.limit,
+              remaining: rateLimitDoc.day.remaining,
+              reset: rateLimitDoc.day.reset,
             }
           }
 
-          if (isDayLimited && rateLimitEntry.day) {
+          if (isDayLimited && rateLimitDoc.day) {
             logger.info(
-              `Retrieved rate limit from database for ${args.endpoint}: Day limit reached, resets at ${new Date(rateLimitEntry.day.reset * 1000).toISOString()}`
+              `Retrieved rate limit from database for ${args.endpoint}: Day limit reached, resets at ${new Date(rateLimitDoc.day.reset * 1000).toISOString()}`
             )
           } else {
             logger.info(
@@ -167,8 +239,11 @@ export class TwitterRateLimitMongoStore implements ITwitterApiRateLimitStore {
     }
 
     try {
-      // Create rate limit data that includes both Twitter API fields and our context
-      const rateLimitData: XRateLimitWithContext = {
+      // Create rate limit data
+      const rateLimitData = {
+        // User reference
+        user_id: this.currentUserId,
+
         // Twitter API fields
         limit: rateLimit.limit,
         remaining: rateLimit.remaining,
@@ -177,76 +252,25 @@ export class TwitterRateLimitMongoStore implements ITwitterApiRateLimitStore {
         // Day limit fields if available
         ...(rateLimit.day && { day: rateLimit.day }),
 
-        // Our context fields
+        // Context fields
         endpoint: endpoint,
         method: method,
         last_updated: new Date(),
       }
 
-      // Update the rate limit list - find and update existing or push new
-      // First try exact match
-      let updateResult = await UserModel.updateOne(
+      // Upsert the rate limit document
+      await TwitterRateLimitModel.findOneAndUpdate(
         {
-          _id: this.currentUserId,
-          'twitterRateLimits.endpoint': endpoint,
-          'twitterRateLimits.method': method,
+          user_id: this.currentUserId,
+          endpoint: endpoint,
+          method: method,
         },
+        rateLimitData,
         {
-          $set: {
-            'twitterRateLimits.$': rateLimitData,
-          },
+          upsert: true,
+          new: true,
         }
       )
-
-      // If no exact match found, try with normalized endpoint
-      if (updateResult.matchedCount === 0) {
-        const normalizedEndpoint = normalizeEndpoint(endpoint)
-
-        // Find documents where the normalized endpoint matches
-        const userRateLimits = await UserModel.findOne(
-          { _id: this.currentUserId },
-          { twitterRateLimits: 1 }
-        ).lean()
-
-        if (userRateLimits?.x_rate_limits) {
-          const matchingIndex = userRateLimits.x_rate_limits.findIndex(
-            (rl) =>
-              normalizeEndpoint(rl.endpoint) === normalizedEndpoint &&
-              rl.method === method
-          )
-
-          if (matchingIndex !== -1) {
-            // Update using the positional $ operator with the found index
-            await UserModel.updateOne(
-              { _id: this.currentUserId },
-              {
-                $set: {
-                  [`twitterRateLimits.${matchingIndex}`]: rateLimitData,
-                },
-              }
-            )
-            updateResult = {
-              matchedCount: 1,
-              modifiedCount: 1,
-              upsertedCount: 0,
-              upsertedId: null,
-              acknowledged: true,
-            }
-          }
-        }
-      }
-
-      // If we didn't update an existing record, add a new one
-      if (updateResult.matchedCount === 0) {
-        await UserModel.updateOne(
-          { _id: this.currentUserId },
-          {
-            $push: {
-              twitterRateLimits: rateLimitData,
-            },
-          }
-        )
-      }
 
       // Convert reset timestamp to date for logging
       const resetDate = new Date(rateLimit.reset * 1000)
@@ -265,6 +289,33 @@ export class TwitterRateLimitMongoStore implements ITwitterApiRateLimitStore {
     } catch (error) {
       logger.error(
         `Failed to store rate limit in database: ${error instanceof Error ? error.message : String(error)}`
+      )
+    }
+  }
+
+  /**
+   * Clean up expired rate limits for a user (optional maintenance method)
+   */
+  async cleanupExpired(): Promise<void> {
+    if (!this.currentUserId) {
+      return
+    }
+
+    try {
+      const now = Math.floor(Date.now() / 1000) // Current time in seconds
+
+      await TwitterRateLimitModel.deleteMany({
+        user_id: this.currentUserId,
+        reset: { $lt: now },
+        $or: [{ day: { $exists: false } }, { 'day.reset': { $lt: now } }],
+      })
+
+      logger.info(
+        `Cleaned up expired rate limits for user ${this.currentUserId}`
+      )
+    } catch (error) {
+      logger.error(
+        `Failed to clean up expired rate limits: ${error instanceof Error ? error.message : String(error)}`
       )
     }
   }

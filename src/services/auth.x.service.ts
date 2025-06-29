@@ -239,7 +239,6 @@ export class AuthXService {
       x_username: auth.x_username,
       x_display_name: auth.x_display_name,
       x_profile_image_url: auth.x_profile_image_url,
-      x_rate_limits: twitterRateLimits?.x_rate_limits ?? [],
       status: 'authenticated',
     }
   }

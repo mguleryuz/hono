@@ -1,4 +1,4 @@
-import type { ApiSecret, User, XRateLimitWithContext } from '@/schemas'
+import type { ApiSecret, User } from '@/schemas'
 import { model, Schema } from 'mongoose'
 
 // ----------------------------------------------------------------------------
@@ -27,52 +27,6 @@ export const ApiSecretSchema = new Schema<ApiSecret>(
   {
     _id: false,
     timestamps: true,
-  }
-)
-
-// Schema for the SingleTwitterRateLimit structure (used in main and day limits)
-const SingleTwitterRateLimitSchema = {
-  limit: {
-    type: Number,
-    required: true,
-  },
-  remaining: {
-    type: Number,
-    required: true,
-  },
-  reset: {
-    type: Number, // Unix timestamp in seconds
-    required: true,
-  },
-}
-
-export const TwitterRateLimitSchema = new Schema<XRateLimitWithContext>(
-  {
-    // Standard rate limit fields (SingleTwitterRateLimit)
-    ...SingleTwitterRateLimitSchema,
-
-    // Day limit fields (nested SingleTwitterRateLimit)
-    day: {
-      type: SingleTwitterRateLimitSchema,
-      required: false,
-    },
-
-    // Context fields
-    endpoint: {
-      type: String,
-      required: true,
-    },
-    method: {
-      type: String,
-      required: true,
-    },
-    last_updated: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  {
-    _id: false,
   }
 )
 
@@ -114,10 +68,6 @@ export const UserSchema = new Schema<User>(
     },
     x_profile_image_url: {
       type: String,
-    },
-    x_rate_limits: {
-      type: [TwitterRateLimitSchema],
-      default: [],
     },
 
     // WhatsApp

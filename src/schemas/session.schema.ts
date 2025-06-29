@@ -24,8 +24,7 @@ export const XSession = Schema.Struct({
     'x_user_id',
     'x_username',
     'x_display_name',
-    'x_profile_image_url',
-    'x_rate_limits'
+    'x_profile_image_url'
   ).fields,
 }).annotations({ description: 'Twitter/X session response' })
 
@@ -43,8 +42,7 @@ export const CombinedSession = Schema.Struct({
     'x_user_id',
     'x_username',
     'x_display_name',
-    'x_profile_image_url',
-    'x_rate_limits'
+    'x_profile_image_url'
   ).fields,
 }).annotations({
   description: 'Combined session response - Combines all session types',

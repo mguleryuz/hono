@@ -38,86 +38,6 @@ export const ApiSecretSchema = Schema.Struct({
 export type ApiSecret = typeof ApiSecretSchema.Type
 
 // ----------------------------------------------------------------------------
-// RATE LIMITS
-
-export const XRateLimitSchema = Schema.Struct({
-  endpoint: Schema.String,
-  method: Schema.String,
-  last_updated: Schema.Date,
-}).annotations({
-  title: 'XRateLimit',
-  description: 'Twitter/X API rate limit tracking metadata',
-  examples: [
-    {
-      endpoint: 'tweets/search/recent',
-      method: 'GET',
-      last_updated: new Date(),
-    },
-  ],
-})
-
-export type XRateLimit = typeof XRateLimitSchema.Type
-
-export const TwitterApiRateLimitSchema = Schema.Struct({
-  limit: Schema.Number.annotations({
-    description: 'Maximum requests allowed',
-  }),
-  remaining: Schema.Number.annotations({
-    description: 'Requests remaining',
-  }),
-  reset: Schema.Number.annotations({
-    description: 'Unix timestamp when limit resets',
-  }),
-  day: Schema.optional(
-    Schema.Struct({
-      limit: Schema.Number,
-      remaining: Schema.Number,
-      reset: Schema.Number,
-    }).annotations({
-      description: 'Optional daily limits',
-    })
-  ),
-}).annotations({
-  title: 'TwitterApiRateLimit',
-  description: 'Twitter API rate limit structure from twitter-api-v2 library',
-  examples: [
-    {
-      limit: 15,
-      remaining: 14,
-      reset: 1234567890,
-      day: {
-        limit: 1000,
-        remaining: 950,
-        reset: 1234567890,
-      },
-    },
-  ],
-})
-
-export type TwitterApiRateLimit = typeof TwitterApiRateLimitSchema.Type
-
-export const XRateLimitWithContextSchema = Schema.extend(
-  TwitterApiRateLimitSchema,
-  XRateLimitSchema
-).annotations({
-  title: 'XRateLimitWithContext',
-  description:
-    'Combines Twitter API rate limit data with additional context fields',
-  examples: [
-    {
-      limit: 15,
-      remaining: 14,
-      reset: 1234567890,
-      endpoint: 'tweets/search/recent',
-      method: 'GET',
-      last_updated: new Date(),
-    },
-  ],
-})
-
-export type XRateLimitWithContext = typeof XRateLimitWithContextSchema.Type
-
-// ----------------------------------------------------------------------------
 // USER
 
 export const UserSchema = Schema.Struct({
@@ -152,11 +72,6 @@ export const UserSchema = Schema.Struct({
   }),
   x_profile_image_url: Schema.optional(Schema.String).annotations({
     description: 'URL to Twitter/X profile image',
-  }),
-  x_rate_limits: Schema.optional(
-    Schema.Array(XRateLimitWithContextSchema)
-  ).annotations({
-    description: 'Array of Twitter/X API rate limit tracking data',
   }),
 
   // WhatsApp
