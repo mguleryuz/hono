@@ -36,6 +36,7 @@
 - 🔐 **Multi-Auth System** - EVM, WhatsApp OTP, and Twitter/X OAuth
 - 📊 **Real-time Dashboard** - Live user management interface
 - 🐳 **Production Ready** - Docker support with multi-stage builds
+- 📅 **Job Scheduling** - Built-in Pulse scheduler for background tasks
 
 </td>
 <td width="50%">
@@ -128,14 +129,42 @@
   <sub>Schema & Docs</sub>
 </td>
 </tr>
+<tr>
+<td align="center" width="96">
+  <br>
+  <b>Pulse</b><br>
+  <sub>Job Scheduler</sub>
+</td>
+</tr>
 </table>
+
+## 📅 Job Scheduling with Pulse
+
+This template includes [Pulse](https://docs-pulse.pulsecron.com/), a MongoDB-backed job scheduler that automatically manages job persistence and execution.
+
+### Key Features
+
+- 🔄 **Self-managed schemas** - Pulse handles all database schemas automatically
+- 💾 **Persistent jobs** - Jobs survive server restarts and resume automatically
+- 🔁 **Retry mechanisms** - Built-in retry logic with exponential and fixed backoff
+- ⚡ **Concurrency control** - Limit how many jobs run simultaneously
+- 📊 **Event-driven** - React to job lifecycle events (start, success, fail)
+
+### Job Management
+
+All jobs are defined in the `/src/jobs` directory. Check out:
+
+- 🔧 `/src/jobs/example-jobs.ts` - Example implementations
+- 📝 `/src/jobs/index.ts` - Main job initialization
+
+Jobs are automatically initialized on server startup and gracefully shut down on termination.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - **Bun** (latest version) - [Install Bun](https://bun.sh)
-- **MongoDB** instance (local or cloud)
+- **MongoDB** instance (local or cloud) - Required for database and Pulse job scheduling
 - **AWS S3** bucket (for file storage)
 
 ### 1️⃣ Clone & Install
@@ -178,6 +207,8 @@ cp .env.example .env
 ```
 
 📝 **Note**: Check `.env.example` for all required environment variables and their descriptions.
+
+💡 **Pulse Note**: The job scheduler will automatically create a `pulseJobs` collection in your MongoDB database on first run.
 
 ### 4️⃣ Start Development
 
@@ -223,9 +254,14 @@ hono/
 ├── src/                           # Server source directory
 │   ├── api.ts                     # API file
 │   ├── index.ts                   # Index file
-│   ├── jobs/                      # Jobs
+│   ├── jobs/                      # Jobs (Pulse scheduler)
+│   │   ├── index.ts               # Job initialization
+│   │   ├── example-jobs.ts        # Example job definitions
+│   │   └── README.md              # Job documentation
 │   ├── mongo/                     # MongoDB
 │   │   ├── helpers/               # Helpers
+│   │   │   ├── model-change-listener.ts    # Mongo Streams Listener
+│   │   │   └── pulse.ts           # Pulse job scheduler config
 │   ├── routes/                    # Routes
 │   ├── schemas/                   # Schemas
 │   ├── services/                  # Services
