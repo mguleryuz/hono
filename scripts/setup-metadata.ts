@@ -182,6 +182,22 @@ async function setupMetadata() {
     await fs.writeFile(sidebarPath, updatedSidebar)
     console.log(`${colors.green}✓${colors.reset} Updated app-sidebar.tsx`)
 
+    // Update rainbow-provider.tsx
+    const rainbowProviderPath = join(
+      process.cwd(),
+      'client',
+      'src',
+      'providers',
+      'rainbow-provider.tsx'
+    )
+    const rainbowProvider = await fs.readFile(rainbowProviderPath, 'utf-8')
+    const updatedRainbowProvider = rainbowProvider.replace(
+      /<project_name>/g,
+      metadata.projectName
+    )
+    await fs.writeFile(rainbowProviderPath, updatedRainbowProvider)
+    console.log(`${colors.green}✓${colors.reset} Updated rainbow-provider.tsx`)
+
     // Success message
     console.log(
       `\n${colors.bright}${colors.green}✨ Project metadata setup complete!${colors.reset}\n`

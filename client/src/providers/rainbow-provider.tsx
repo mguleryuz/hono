@@ -20,7 +20,7 @@ const isEvmAuth = authMethod === 'evm'
 // ============================================================================
 
 export function RainbowProvider({ children }: { children: React.ReactNode }) {
-  // Use consolidated auth hook with auto-prompt enabled globally
+  // Use consolidated auth hook
   const auth = useAuthEvm()
 
   // Prepare the authentication adapter
@@ -54,21 +54,11 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
       }),
     verify: async ({ message, signature }) => {
       try {
-        const verifyRes = await fetch('/api/auth/evm/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, signature }),
-          credentials: 'include',
+        // Use the verify mutation from the hook
+        await auth.verify({
+          payload: { message, signature: signature as `0x${string}` },
         })
-
-        const ok = Boolean(verifyRes.ok)
-
-        if (ok) {
-          // Refetch auth state after successful verification
-          await auth.refetch()
-        }
-
-        return ok
+        return true
       } catch (error) {
         console.error('Error verifying message:', error)
         return false
@@ -76,15 +66,10 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
     },
     signOut: async () => {
       try {
-        await fetch(`/api/auth/evm/signout`, {
-          method: 'GET',
-          credentials: 'include',
-        })
+        // Use the signOut mutation from the hook
+        await auth.signOut()
       } catch (error) {
         console.error('Error signing out:', error)
-      } finally {
-        // Always refetch to update local state after signout
-        await auth.refetch()
       }
     },
   })
@@ -93,7 +78,9 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
   return (
     <RainbowKitAuthenticationProvider
       adapter={authenticationAdapter}
-      status={auth.data.status}
+      status={
+        auth.data.status as 'loading' | 'authenticated' | 'unauthenticated'
+      }
       enabled={isEvmAuth}
     >
       <RainbowKitProvider
