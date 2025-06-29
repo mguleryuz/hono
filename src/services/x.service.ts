@@ -31,14 +31,23 @@ export class XService {
   private _userClientsCache: CacheContainer
   private _rateLimitPlugin: TwitterApiRateLimitPlugin
   private _rateLimitStore: TwitterRateLimitMongoStore
+  private _appRateLimitPlugin: TwitterApiRateLimitPlugin
+  private _appRateLimitStore: TwitterRateLimitMongoStore
 
   constructor() {
     const clientId = getXClientId()
     const clientSecret = getXClientSecret()
 
-    // Initialize rate limit store and plugin
+    // Initialize rate limit store and plugin for user clients
     this._rateLimitStore = new TwitterRateLimitMongoStore()
     this._rateLimitPlugin = new TwitterApiRateLimitPlugin(this._rateLimitStore)
+
+    // Initialize separate rate limit store and plugin for app client
+    // Pass undefined to indicate this is for app-level rate limiting
+    this._appRateLimitStore = new TwitterRateLimitMongoStore()
+    this._appRateLimitPlugin = new TwitterApiRateLimitPlugin(
+      this._appRateLimitStore
+    )
 
     if (clientId && clientSecret) {
       this._client = new TwitterApi(
@@ -55,12 +64,15 @@ export class XService {
     const xApiSecret = getXApiSecret()
 
     if (xAccessToken && xAccessTokenSecret && xApiKey && xApiSecret) {
-      this._appClient = new TwitterApi({
-        appKey: xApiKey,
-        appSecret: xApiSecret,
-        accessToken: xAccessToken,
-        accessSecret: xAccessTokenSecret,
-      })
+      this._appClient = new TwitterApi(
+        {
+          appKey: xApiKey,
+          appSecret: xApiSecret,
+          accessToken: xAccessToken,
+          accessSecret: xAccessTokenSecret,
+        },
+        { plugins: [this._appRateLimitPlugin] }
+      )
     }
   }
 
@@ -79,6 +91,14 @@ export class XService {
 
   get rateLimitStore() {
     return this._rateLimitStore
+  }
+
+  get appRateLimitPlugin() {
+    return this._appRateLimitPlugin
+  }
+
+  get appRateLimitStore() {
+    return this._appRateLimitStore
   }
 
   /**
