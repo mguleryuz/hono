@@ -1,8 +1,6 @@
-// Dependencies
-
-// Services
-
 // Handlers
+import { Jobs } from '@/jobs'
+import { stopPulse } from '@/mongo'
 import { Routes } from '@/routes'
 import { BucketService } from '@/services/bucket.service'
 import { logger as log } from '@/utils/logger'
@@ -83,6 +81,9 @@ app.use(
 // Database connection
 await connectDb()
 
+// Initialize jobs after database connection
+new Jobs()
+
 // Session handling
 try {
   app.use(sessionMiddleware())
@@ -102,6 +103,19 @@ export const userService = new UserService()
 new Routes(app, isDev)
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
+
+// Graceful shutdown handler
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM signal received: closing HTTP server')
+  await stopPulse()
+  process.exit(0)
+})
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT signal received: closing HTTP server')
+  await stopPulse()
+  process.exit(0)
+})
 
 // Export server configuration
 export default {

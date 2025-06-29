@@ -1,28 +1,45 @@
 /**
  * You can start adding your job tasks to the @/jobs folder.
- * import the tasks and run them in the constructor of the Jobs class.
+ * import the tasks and define them in the constructor of the Jobs class.
  *
+ * Pulse will manage all job schedules in the database automatically.
  */
 
-import { JobManager } from '@/mongo'
-import { Cron } from 'croner'
-
-const managerInstance = JobManager.getInstance()
+import { getPulse } from '@/mongo'
 
 export class Jobs {
   constructor() {
-    // Place your jobs here i.e.
-    new Cron('0 * * * *', () => {
-      console.log('Hello, world!')
-    })
-    // Or use the JobManager instance
-    // ( this instance enables you to update the schedule of the job, via a api call )
-    managerInstance.startJob({
-      name: 'EXEMPLE_JOB',
-      schedule: '0 * * * *',
-      task: () => {
-        console.log('Hello, world!')
-      },
-    })
+    this.initialize()
+  }
+
+  private async initialize() {
+    try {
+      const pulse = await getPulse()
+
+      // Define the example job
+      pulse.define(
+        'EXAMPLE_JOB',
+        async (job) => {
+          console.log('Hello, world!', new Date().toISOString())
+          // Add your job logic here
+        },
+        {
+          priority: 'normal',
+          concurrency: 1,
+        }
+      )
+
+      // Schedule the job to run every hour
+      await pulse.every('0 * * * *', 'EXAMPLE_JOB')
+
+      // You can also schedule jobs with other patterns:
+      // await pulse.every('5 minutes', 'EXAMPLE_JOB')
+      // await pulse.schedule('in 20 minutes', 'EXAMPLE_JOB', { someData: 'value' })
+      // await pulse.now('EXAMPLE_JOB', { someData: 'value' })
+
+      console.log('✅ Jobs initialized with Pulse')
+    } catch (error) {
+      console.error('❌ Failed to initialize jobs:', error)
+    }
   }
 }

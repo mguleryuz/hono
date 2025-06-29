@@ -1,3 +1,3 @@
 export * from './helpers'
-export * from './job.mongo'
+export * from './helpers/pulse'
 export * from './user.mongo'
