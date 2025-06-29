@@ -42,7 +42,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <Toaster
         closeButton
         richColors
-        position="bottom-center"
+        position="bottom-right"
         duration={5_000}
       />
     </ThemeProvider>
