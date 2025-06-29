@@ -1,144 +1,331 @@
-# 🚀 Hono Template with Bun
+# 🚀 Hono + React Full-Stack Template
 
-A lightning-fast web application template using Hono.js and Bun runtime, with MongoDB integration and Docker support.
+<div align="center">
+  <img src="static/og-image.png" alt="Hono Template" width="600" />
+  
+  <p align="center">
+    <strong>Lightning-fast full-stack web application template</strong>
+  </p>
+
+  <p align="center">
+    Built with Hono.js, React, Bun runtime, and MongoDB
+  </p>
+
+  <p align="center">
+    <a href="#-features">Features</a> •
+    <a href="#-tech-stack">Tech Stack</a> •
+    <a href="#-quick-start">Quick Start</a> •
+    <a href="#-api-documentation">API Docs</a> •
+    <a href="#-deployment">Deployment</a>
+  </p>
+</div>
+
+---
 
 ## ✨ Features
 
-- 🏃‍♂️ **Ultra-fast Performance**: Built with Hono.js and Bun runtime
-- 🗃️ **MongoDB Integration**: Ready-to-use MongoDB connection with Mongoose
-- 🐳 **Docker Support**: Complete Docker setup with multi-stage builds
-- 🔄 **Job Management**: Built-in job scheduler with Cron support
-- 👥 **Users Table Demo**: Interactive users table with pagination on the welcome page
-- 🛠️ **Developer Tools**:
-  - TypeScript configuration
-  - ESLint + Prettier setup
-  - Conventional commits with Husky
-  - GitHub Actions workflow for AWS ECR
+<table>
+<tr>
+<td width="50%">
+
+### 🎯 Core Features
+
+- ⚡ **Unified Development** - Single command runs both frontend & backend
+- 🏃 **Ultra-fast Performance** - Powered by Bun runtime
+- 🔐 **Multi-Auth System** - EVM, WhatsApp OTP, and Twitter/X OAuth
+- 📊 **Real-time Dashboard** - Live user management interface
+- 🐳 **Production Ready** - Docker support with multi-stage builds
+
+</td>
+<td width="50%">
+
+### 🛠️ Developer Experience
+
+- 📚 **Auto-generated API Docs** - Swagger UI powered by Effect
+- 🎨 **Beautiful UI Library** - Complete shadcn/ui components
+- 📝 **Type Safety** - Full TypeScript support
+- 🔄 **Hot Reload** - Instant feedback during development
+- ✅ **Code Quality** - ESLint, Prettier, and Husky pre-configured
+
+</td>
+</tr>
+</table>
+
+## 🔧 Tech Stack
+
+<table>
+<tr>
+<td align="center" width="96">
+  <br>
+  <b>Bun</b><br>
+  <sub>Runtime</sub>
+</td>
+<td align="center" width="96">
+  <br>
+  <b>Hono.js</b><br>
+  <sub>Backend</sub>
+</td>
+<td align="center" width="96">
+  <br>
+  <b>React</b><br>
+  <sub>Frontend</sub>
+</td>
+<td align="center" width="96">
+  <br>
+  <b>MongoDB</b><br>
+  <sub>Database</sub>
+</td>
+<td align="center" width="96">
+  <br>
+  <b>TypeScript</b><br>
+  <sub>Language</sub>
+</td>
+</tr>
+<tr>
+<td align="center" width="96">
+  <br>
+  <b>Vite</b><br>
+  <sub>Build Tool</sub>
+</td>
+<td align="center" width="96">
+  <br>
+  <b>TanStack</b><br>
+  <sub>Router</sub>
+</td>
+<td align="center" width="96">
+  <br>
+  <b>Tailwind</b><br>
+  <sub>Styling</sub>
+</td>
+<td align="center" width="96">
+  <br>
+  <b>shadcn/ui</b><br>
+  <sub>Components</sub>
+</td>
+<td align="center" width="96">
+  <br>
+  <b>Effect</b><br>
+  <sub>Schema & Docs</sub>
+</td>
+</tr>
+</table>
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Bun (latest version)
-- Docker (optional)
-- MongoDB instance
+- **Bun** (latest version) - [Install Bun](https://bun.sh)
+- **MongoDB** instance (local or cloud)
+- **AWS S3** bucket (for file storage)
 
-### Installation
+### 1️⃣ Clone & Install
 
-1. Clone the repository:
-
-```sh
+```bash
+# Clone the repository
 git clone https://github.com/mguleryuz/hono.git
+cd hono
+
+# Install dependencies
+bun i
 ```
 
-2. Install dependencies:
+### 2️⃣ Configure Environment
 
-```sh
-bun install
-```
+Copy and configure your environment variables:
 
-3. Set up your environment variables:
-
-- Create .env file from example
-
-```sh
+```bash
 cp .env.example .env
 ```
 
-### Development
+📝 **Note**: Check `.env.example` for all required environment variables and their descriptions.
 
-Start the development server:
+### 3️⃣ Start Development
 
-```sh
+```bash
+# Start both frontend and backend (port 8080)
 bun dev
 ```
 
-The server will start at `http://localhost:8080` with hot-reload enabled.
+🎉 **That's it!** Visit [http://localhost:8080](http://localhost:8080)
 
-### Production
+## 📁 Project Architecture
 
-Build and start the production server:
-
-```sh
-bun start
+```
+hono/
+├── README.md                      # This file
+├── package.json                   # Package JSON file
+├── bun.lock                       # Bun lock file
+├── Dockerfile                     # Docker build file
+├── commitlint.config.mjs          # Commitlint config file
+├── components.json                # Components JSON file
+├── docker.sh                      # Docker script
+├── eslint.config.mjs              # ESLint config file
+└── tsconfig.json                  # TypeScript config file
+├── client                         # Client directory
+│   ├── index.html                 # Client index file
+│   ├── postcss.config.mjs         # Postcss config file
+│   ├── public/                    # Public directory
+│   │   ├── fonts/                 # Fonts
+│   │   └── images/                # Images
+│   ├── src/                       # Client source directory
+│   │   ├── components/            # Components
+│   │   │   ├── ui/                # UI components
+│   │   ├── hooks/                 # Hooks
+│   │   ├── main.tsx               # Main file
+│   │   ├── providers/             # Providers
+│   │   ├── routeTree.gen.ts       # Route tree generator
+│   │   ├── routes/                # Routes
+│   │   ├── styles/                # Styles
+│   │   └── utils/                 # Utils
+│   └── vite.config.ts             # Vite config file
+├── logs/                          # Logs
+├── scripts/                       # Scripts
+├── src/                           # Server source directory
+│   ├── api.ts                     # API file
+│   ├── index.ts                   # Index file
+│   ├── jobs/                      # Jobs
+│   ├── mongo/                     # MongoDB
+│   │   ├── helpers/               # Helpers
+│   ├── routes/                    # Routes
+│   ├── schemas/                   # Schemas
+│   ├── services/                  # Services
+│   ├── types/                     # Types
+│   └── utils/                     # Utils
+│       └── server/                # Server utils
+├── static/                        # Static files
+├── tests/                         # Tests
 ```
 
-### Docker Support
+## 🔌 API Documentation
 
-The template includes a convenient Docker management script:
+The API is automatically documented with Swagger UI powered by Effect schemas.
 
-```sh
+🔗 **Access Complete API Documentation**: [http://localhost:8080/api/docs](http://localhost:8080/api/docs)
+
+The interactive Swagger UI provides:
+
+- Complete list of all API endpoints
+- Request/response schemas
+- Authentication requirements
+- Try-it-out functionality
+
+## 🎨 UI Components
+
+This template includes a complete shadcn/ui component library:
+
+<details>
+<summary><b>View all components</b></summary>
+
+- **Layout**: Sidebar, Header, Footer
+- **Forms**: Input, Select, Checkbox, Radio, Switch
+- **Buttons**: Button, IconButton, ToggleGroup
+- **Feedback**: Alert, Toast, Progress, Spinner
+- **Overlay**: Dialog, Sheet, Popover, Tooltip
+- **Data**: Table, Card, Badge, Avatar
+- **Navigation**: Tabs, Breadcrumb, Pagination
+- **Utilities**: ThemeSwitcher, CopyableAddress
+
+</details>
+
+## 🔐 Authentication Methods
+
+<table>
+<tr>
+<td width="33%">
+
+### 🦊 EVM Wallet
+
+Connect with MetaMask or any Web3 wallet using RainbowKit
+
+</td>
+<td width="33%">
+
+### 📱 WhatsApp
+
+Secure OTP-based authentication via WhatsApp Business API
+
+</td>
+<td width="33%">
+
+### 🐦 Twitter/X
+
+OAuth 2.0 integration for Twitter/X platform login
+
+</td>
+</tr>
+</table>
+
+## 🐳 Docker Deployment
+
+```bash
+# Build and run with Docker script
 bun docker
 ```
 
-This will show you various Docker operations like:
+## 🔄 Release Flow
 
-- Building images
-- Starting containers
-- Managing containers and images
-- And more!
+This project follows [Conventional Commits](https://www.conventionalcommits.org/) and uses [Standard Version](https://github.com/conventional-changelog/standard-version) for automated versioning and changelog generation.
 
-## 🏗️ Project Structure
+### Release Commands
 
-├── src/
-│ ├── index.ts # Application entry point
-│ ├── lib/ # Core libraries
-│ ├── utils/ # Utility functions
-│ ├── middlewares/ # Middlewares
-│ ├── services/ # Services
-│ ├── types/ # Types
-│ └── jobs/ # Background jobs
-├── scripts/ # Development scripts
-├── tests/ # Tests
-├── .github/ # GitHub Actions workflows
-└── docker.sh # Docker management script
+```bash
+# Create a new release
+bun release
 
-## 📊 Demo Features
+# Create a pre-release
+bun release:alpha  # Alpha release
+bun release:beta   # Beta release
 
-### Users Table
-
-The welcome page includes an interactive users table that demonstrates:
-
-- **Paginated Data Fetching**: Shows users from the MongoDB database with pagination
-- **Responsive Design**: Mobile-first responsive table layout
-- **Loading States**: Skeleton loading animations while data is being fetched
-- **Error Handling**: Graceful error display if the API fails
-- **User Information Display**: Shows user roles, addresses, Twitter handles, WhatsApp numbers, and creation dates
-- **Copy Functionality**: Click to copy wallet addresses to clipboard
-
-The table fetches data from the `/api/users` endpoint and automatically updates when pagination controls are used.
-
-## 🛠️ Development Tools
-
-### Linting and Formatting
-
-The project uses ESLint and Prettier for code quality:
-
-```sh
-bunx eslint --fix
-bunx prettier --write
+# Push release to origin
+bun release:pub
 ```
 
-### Git Hooks
+### Release Process
 
-Husky is configured with:
+1. **Commit Changes** - Use conventional commit messages:
+   - `feat:` New features (minor version bump)
+   - `fix:` Bug fixes (patch version bump)
+   - `BREAKING CHANGE:` Breaking changes (major version bump)
 
-- Pre-commit: Runs linting and formatting
-- Commit-msg: Ensures conventional commit messages
+2. **Create Release** - Run `bun release` to:
+   - Bump version in package.json
+   - Generate/update CHANGELOG.md
+   - Create a git tag
+
+3. **Publish** - Run `bun release:pub` to push tags and trigger CI/CD
+
+## ☁️ AWS Deployment
+
+### GitHub Actions Setup
+
+1. **Add GitHub Secrets**:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+
+2. **Add GitHub Variables**:
+   - `AWS_REGION`
+
+3. **Push to main branch** - GitHub Actions will automatically build and deploy to AWS ECR
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We love contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+<table>
+<tr>
+<td align="center">
+<sub>Made with ❤️ by</sub><br>
+<a href="https://github.com/mguleryuz">mguleryuz</a>
+</td>
+</tr>
+</table>
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+---
 
-- [Hono](https://hono.dev) - Ultrafast web framework for the Edges
-- [Bun](https://bun.sh) - Fast all-in-one JavaScript runtime
+<div align="center">
+  <sub>Built with ⚡ Bun and 🔥 Hono</sub>
+</div>

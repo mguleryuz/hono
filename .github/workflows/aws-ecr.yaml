@@ -4,7 +4,15 @@ on:
   push:
     branches:
       - main
-      - dev
+      - staging
+    paths:
+      - 'package.json'
+      - 'packages/**'
+      - 'src/**'
+      - 'client/**'
+      - 'static/**'
+      - 'Dockerfile'
+      - 'bun.lock'
   workflow_dispatch:
 
 jobs:

@@ -9,7 +9,11 @@
     "dev": "concurrently \"bun --cwd=client vite dev\" \"NODE_ENV=development bun --watch run src/index.ts\"",
     "watch": "tsc -w -p ./tsconfig.json",
     "docker": "chmod +x docker.sh && ./docker.sh",
-    "postinstall": "husky || true"
+    "postinstall": "husky || true",
+    "release": "standard-version -a",
+    "release:alpha": "standard-version -a --prerelease alpha --skip.changelog",
+    "release:beta": "standard-version -a --prerelease beta --skip.changelog",
+    "release:pub": "git push --follow-tags origin $(git rev-parse --abbrev-ref HEAD)"
   },
   "lint-staged": {
     "src/**/*.{mjs,cjs,js,ts,d.ts}": [
