@@ -14,7 +14,8 @@
     "release": "standard-version -a",
     "release:alpha": "standard-version -a --prerelease alpha --skip.changelog",
     "release:beta": "standard-version -a --prerelease beta --skip.changelog",
-    "release:pub": "git push --follow-tags origin $(git rev-parse --abbrev-ref HEAD)"
+    "release:pub": "git push --follow-tags origin $(git rev-parse --abbrev-ref HEAD)",
+    "setup": "bun scripts/setup-metadata.ts"
   },
   "lint-staged": {
     "src/**/*.{mjs,cjs,js,ts,d.ts}": [

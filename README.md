@@ -129,7 +129,27 @@ cd hono
 bun i
 ```
 
-### 2️⃣ Configure Environment
+### 2️⃣ Setup Project Metadata
+
+Set up your project name and metadata:
+
+```bash
+bun setup
+```
+
+This interactive script will help you configure:
+
+- **Project name** - NPM package name for your project
+- **App title** - Display name used in the UI
+- **Page title** - Browser tab title
+- **Description** - Project description for SEO
+- **Keywords** - SEO keywords
+- **Open Graph metadata** - For social media sharing
+- **Twitter Card metadata** - For Twitter/X sharing
+
+The script will automatically update all placeholder values throughout the project.
+
+### 3️⃣ Configure Environment
 
 Copy and configure your environment variables:
 
@@ -139,7 +159,7 @@ cp .env.example .env
 
 📝 **Note**: Check `.env.example` for all required environment variables and their descriptions.
 
-### 3️⃣ Start Development
+### 4️⃣ Start Development
 
 ```bash
 # Start both frontend and backend (port 8080)
