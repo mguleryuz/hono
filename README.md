@@ -13,6 +13,7 @@
 
   <p align="center">
     <a href="#-features">Features</a> •
+    <a href="#-screenshots">Screenshots</a> •
     <a href="#-tech-stack">Tech Stack</a> •
     <a href="#-quick-start">Quick Start</a> •
     <a href="#-api-documentation">API Docs</a> •
@@ -47,6 +48,25 @@
 - 🔄 **Hot Reload** - Instant feedback during development
 - ✅ **Code Quality** - ESLint, Prettier, and Husky pre-configured
 
+</td>
+</tr>
+</table>
+
+## 📸 Screenshots
+
+<table>
+<tr>
+<td align="center">
+  <img src="static/landing_preview.png" alt="Landing Page" />
+  <p><b>Landing Page</b></p>
+  <sub>Modern, responsive dashboard interface</sub>
+</td>
+</tr>
+<tr>
+<td align="center">
+  <img src="static/docs_preview.png" alt="API Documentation" />
+  <p><b>API Documentation</b></p>
+  <sub>Auto-generated Swagger UI with interactive API testing</sub>
 </td>
 </tr>
 </table>
