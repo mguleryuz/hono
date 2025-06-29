@@ -19,4 +19,4 @@ export const JobScheduleSchema = new Schema<JobSchedule>({
 // ----------------------------------------------------------------------------
 // MODELS
 
-export const JobScheduleModel = model('job-schedules', JobScheduleSchema)
+export const JobScheduleModel = model('job_schedules', JobScheduleSchema)
