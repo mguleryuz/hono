@@ -14,11 +14,11 @@ import {
 
 import { UserModel } from '../mongo'
 
-type VerifyPayloadType = GetRequestParams<'evmAuth', 'verify'>['payload']
-type VerifyResponseType = GetCleanSuccessType<'evmAuth', 'verify'>
-type SessionType = GetCleanSuccessType<'evmAuth', 'session'>
-type NonceResponseType = GetCleanSuccessType<'evmAuth', 'nonce'>
-type SignOutResponseType = GetCleanSuccessType<'evmAuth', 'signout'>
+type VerifyPayloadType = GetRequestParams<'auth-evm', 'verify'>['payload']
+type VerifyResponseType = GetCleanSuccessType<'auth-evm', 'verify'>
+type SessionType = GetCleanSuccessType<'auth-evm', 'session'>
+type NonceResponseType = GetCleanSuccessType<'auth-evm', 'nonce'>
+type SignOutResponseType = GetCleanSuccessType<'auth-evm', 'signout'>
 
 export class AuthEvmService {
   nonce(c: Context): NonceResponseType {

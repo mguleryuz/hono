@@ -2,9 +2,9 @@ import type { GetRequestParams, GetReturnType } from '@/types'
 import { HttpApi, HttpApiClient } from '@effect/platform'
 import { Effect, Schema } from 'effect'
 
-import { evmAuthGroup } from './schemas/auth.evm.schema'
-import { whatsappAuthGroup } from './schemas/auth.whatsapp.schema'
-import { twitterAuthGroup } from './schemas/auth.x.schema'
+import { authEvmGroup } from './schemas/auth.evm.schema'
+import { authWhatsAppGroup } from './schemas/auth.whatsapp.schema'
+import { authXGroup } from './schemas/auth.x.schema'
 import { usersGroup } from './schemas/users.schema'
 
 const ErrorResponse = Schema.Struct({
@@ -26,10 +26,10 @@ export const Api = HttpApi.make('Api')
   .addError(ErrorResponse, { status: 406 }) // Not Acceptable
   .addError(ErrorResponse, { status: 408 }) // Request Timeout
   .addError(ErrorResponse, { status: 409 }) // Conflict
-  .add(whatsappAuthGroup)
-  .add(evmAuthGroup)
+  .add(authWhatsAppGroup)
+  .add(authEvmGroup)
   .add(usersGroup)
-  .add(twitterAuthGroup)
+  .add(authXGroup)
 
 /**
  * @description The api client service

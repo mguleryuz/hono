@@ -18,14 +18,17 @@ import { WABAClient } from 'whatsapp-business'
 
 const d = debug('moai:auth-whatsapp')
 
-type SendOtpPayloadType = GetRequestParams<'whatsappAuth', 'sendOtp'>['payload']
-type SendOtpResponseType = GetCleanSuccessType<'whatsappAuth', 'sendOtp'>
+type SendOtpPayloadType = GetRequestParams<
+  'auth-whatsapp',
+  'sendOtp'
+>['payload']
+type SendOtpResponseType = GetCleanSuccessType<'auth-whatsapp', 'sendOtp'>
 type VerifyOtpPayloadType = GetRequestParams<
-  'whatsappAuth',
+  'auth-whatsapp',
   'verifyOtp'
 >['payload']
-type SessionType = GetCleanSuccessType<'whatsappAuth', 'session'>
-type SignOutResponseType = GetCleanSuccessType<'whatsappAuth', 'signout'>
+type SessionType = GetCleanSuccessType<'auth-whatsapp', 'session'>
+type SignOutResponseType = GetCleanSuccessType<'auth-whatsapp', 'signout'>
 
 /**
  * @description WhatsApp authentication service that handles OTP-based authentication

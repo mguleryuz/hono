@@ -21,11 +21,11 @@ export const WhatsAppSession = Schema.Struct({
 export const XSession = Schema.Struct({
   ...BaseSession.fields,
   ...UserSchema.pick(
-    'twitter_user_id',
-    'twitter_username',
-    'twitter_display_name',
-    'twitter_profile_image_url',
-    'twitter_rate_limits'
+    'x_user_id',
+    'x_username',
+    'x_display_name',
+    'x_profile_image_url',
+    'x_rate_limits'
   ).fields,
 }).annotations({ description: 'Twitter/X session response' })
 
@@ -40,11 +40,11 @@ export const CombinedSession = Schema.Struct({
   ...UserSchema.pick(
     'whatsapp_phone',
     'address',
-    'twitter_user_id',
-    'twitter_username',
-    'twitter_display_name',
-    'twitter_profile_image_url',
-    'twitter_rate_limits'
+    'x_user_id',
+    'x_username',
+    'x_display_name',
+    'x_profile_image_url',
+    'x_rate_limits'
   ).fields,
 }).annotations({
   description: 'Combined session response - Combines all session types',

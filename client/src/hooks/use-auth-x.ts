@@ -11,7 +11,7 @@ export type UserAuthXReturnType = ReturnType<typeof useAuthX>
 
 export function useAuthX() {
   const sessionQuery = useEffectQuery(
-    'twitterAuth',
+    'auth-x',
     'session',
     {},
     {
@@ -24,9 +24,9 @@ export function useAuthX() {
     }
   )
 
-  const isLoggedIn = !!sessionQuery.data?.twitter_user_id
+  const isLoggedIn = !!sessionQuery.data?.x_user_id
 
-  const logout = useEffectMutation('twitterAuth', 'logout', {
+  const logout = useEffectMutation('auth-x', 'logout', {
     includeCredentials: true,
     onSuccess: () => {
       sessionQuery.refetch()

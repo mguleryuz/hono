@@ -189,6 +189,19 @@ export const getXAccessToken = () =>
 export const getXAccessTokenSecret = () =>
   getEnvValue<string>('X_ACCESS_TOKEN_SECRET', 'X_ACCESS_TOKEN_SECRET')
 
+/**
+ * @description Get the Twitter API key
+ * @returns {string | undefined} The Twitter API key
+ */
+export const getXApiKey = () => getEnvValue<string>('X_API_KEY', 'X_API_KEY')
+
+/**
+ * @description Get the Twitter API key
+ * @returns {string | undefined} The Twitter API key
+ */
+export const getXApiSecret = () =>
+  getEnvValue<string>('X_API_SECRET', 'X_API_SECRET')
+
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================

@@ -15,7 +15,7 @@ export function useAuthWhatsapp() {
     isLoading,
     error,
   } = useEffectQuery(
-    'whatsappAuth',
+    'auth-whatsapp',
     'session',
     {},
     {
@@ -31,7 +31,7 @@ export function useAuthWhatsapp() {
   const user = error ? null : sessionData
 
   // Send OTP mutation - needs credentials for session
-  const sendOtpMutation = useEffectMutation('whatsappAuth', 'sendOtp', {
+  const sendOtpMutation = useEffectMutation('auth-whatsapp', 'sendOtp', {
     includeCredentials: true,
     onError: (error: Error) => {
       console.error('Send OTP error:', error)
@@ -39,11 +39,11 @@ export function useAuthWhatsapp() {
   })
 
   // Verify OTP mutation - needs credentials for session
-  const verifyOtpMutation = useEffectMutation('whatsappAuth', 'verifyOtp', {
+  const verifyOtpMutation = useEffectMutation('auth-whatsapp', 'verifyOtp', {
     includeCredentials: true,
     onSuccess: (userData) => {
       // Invalidate and refetch the session query
-      const sessionKey = getQueryKey('whatsappAuth', 'session', {}, true)
+      const sessionKey = getQueryKey('auth-whatsapp', 'session', {}, true)
       queryClient.invalidateQueries({ queryKey: sessionKey })
     },
     onError: (error: Error) => {
@@ -52,11 +52,11 @@ export function useAuthWhatsapp() {
   })
 
   // Sign out mutation - needs credentials for session
-  const signOutMutation = useEffectMutation('whatsappAuth', 'signout', {
+  const signOutMutation = useEffectMutation('auth-whatsapp', 'signout', {
     includeCredentials: true,
     onSuccess: () => {
       // Clear the session cache
-      const sessionKey = getQueryKey('whatsappAuth', 'session', {}, true)
+      const sessionKey = getQueryKey('auth-whatsapp', 'session', {}, true)
       queryClient.setQueryData(sessionKey, null)
       queryClient.invalidateQueries({ queryKey: sessionKey })
     },

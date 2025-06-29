@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 
 import { authEvm } from './auth.evm'
+import { authWhatsApp } from './auth.whatsapp'
 import { authX } from './auth.x'
 import { docs } from './docs'
 import { users } from './users'
@@ -24,6 +25,7 @@ export class Routes {
     api.route('/users', users)
     api.route('/auth/x', authX)
     api.route('/auth/evm', authEvm)
+    api.route('/auth/whatsapp', authWhatsApp)
     api.route('/docs', docs)
 
     // Client-side routing - these should come AFTER API routes

@@ -1,6 +1,14 @@
 import { TwitterRateLimitMongoStore } from '@/mongo/helpers'
 import type { User } from '@/types'
-import { getXClientId, getXClientSecret, logger } from '@/utils'
+import {
+  getXAccessToken,
+  getXAccessTokenSecret,
+  getXApiKey,
+  getXApiSecret,
+  getXClientId,
+  getXClientSecret,
+  logger,
+} from '@/utils'
 import { TwitterApiRateLimitPlugin } from '@twitter-api-v2/plugin-rate-limit'
 import { CacheContainer } from 'node-ts-cache'
 import { MemoryStorage } from 'node-ts-cache-storage-memory'
@@ -19,6 +27,7 @@ export interface RateLimitInfo {
 
 export class XService {
   private readonly _client: TwitterApi | undefined
+  private readonly _appClient: TwitterApi | undefined
   private _userClientsCache: CacheContainer
   private _rateLimitPlugin: TwitterApiRateLimitPlugin
   private _rateLimitStore: TwitterRateLimitMongoStore
@@ -39,10 +48,34 @@ export class XService {
     }
 
     this._userClientsCache = new CacheContainer(new MemoryStorage())
+
+    const xAccessToken = getXAccessToken()
+    const xAccessTokenSecret = getXAccessTokenSecret()
+    const xApiKey = getXApiKey()
+    const xApiSecret = getXApiSecret()
+
+    if (xAccessToken && xAccessTokenSecret && xApiKey && xApiSecret) {
+      this._appClient = new TwitterApi({
+        appKey: xApiKey,
+        appSecret: xApiSecret,
+        accessToken: xAccessToken,
+        accessSecret: xAccessTokenSecret,
+      })
+    }
   }
 
   get client() {
+    if (!this._client) {
+      throw new Error('Client not initialized')
+    }
     return this._client
+  }
+
+  get appClient() {
+    if (!this._appClient) {
+      throw new Error('App client not initialized')
+    }
+    return this._appClient
   }
 
   getRateLimitPlugin(userId: string) {
@@ -68,7 +101,7 @@ export class XService {
       )
 
       if (cachedClient) {
-        logger.info(`Returning cached client for user ${user.twitter_username}`)
+        logger.info(`Returning cached client for user ${user.x_username}`)
         return cachedClient
       }
 
@@ -134,7 +167,7 @@ export class XService {
 
     if (!accessToken) {
       logger.error(
-        `[AUTH ERROR] Invalid or missing access token for user ${user.twitter_username || user.id}`
+        `[AUTH ERROR] Invalid or missing access token for user ${user.x_username || user.id}`
       )
       return null
     }
@@ -153,7 +186,7 @@ export class XService {
         logger.info(`Successfully authenticated as: ${meResult.data.username}`)
       } else {
         logger.info(
-          `Created Twitter client for user ${user.twitter_username} without validation`
+          `Created Twitter client for user ${user.x_username} without validation`
         )
       }
 

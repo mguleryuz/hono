@@ -10,8 +10,8 @@ import { TwitterApi } from 'twitter-api-v2'
 const d = debug('auth.x.service')
 
 // Schema type imports
-type TwitterSessionType = GetCleanSuccessType<'twitterAuth', 'session'>
-type LogoutResponseType = GetCleanSuccessType<'twitterAuth', 'logout'>
+type TwitterSessionType = GetCleanSuccessType<'auth-x', 'session'>
+type LogoutResponseType = GetCleanSuccessType<'auth-x', 'logout'>
 
 /**
  * Service handling Twitter OAuth authentication flow and user session management
@@ -128,12 +128,12 @@ export class AuthXService {
 
       // Prepare user data for database storage
       const userData: Partial<User> = {
-        twitter_username: twitterUser.data.username,
-        twitter_display_name: twitterUser.data.name,
-        twitter_profile_image_url: twitterUser.data.profile_image_url,
-        twitter_access_token: encryptToken(accessToken),
-        twitter_refresh_token: encryptToken(refreshToken),
-        twitter_access_token_expires_at: expiresAt,
+        x_username: twitterUser.data.username,
+        x_display_name: twitterUser.data.name,
+        x_profile_image_url: twitterUser.data.profile_image_url,
+        x_access_token: encryptToken(accessToken),
+        x_refresh_token: encryptToken(refreshToken),
+        x_access_token_expires_at: expiresAt,
         address: undefined,
       }
 
@@ -154,11 +154,11 @@ export class AuthXService {
 
         address: user.address,
 
-        twitter_user_id: user.twitter_user_id,
-        twitter_username: user.twitter_username,
-        twitter_display_name: user.twitter_display_name,
-        twitter_profile_image_url: user.twitter_profile_image_url,
-        twitter_access_token_expires_at: expiresAt,
+        x_user_id: user.x_user_id,
+        x_username: user.x_username,
+        x_display_name: user.x_display_name,
+        x_profile_image_url: user.x_profile_image_url,
+        x_access_token_expires_at: expiresAt,
       })
 
       // Set a longer session duration (30 days) instead of using Twitter's expiration time
@@ -235,11 +235,11 @@ export class AuthXService {
     return {
       mongo_id: auth.id,
       role: auth.role,
-      twitter_user_id: auth.twitter_user_id,
-      twitter_username: auth.twitter_username,
-      twitter_display_name: auth.twitter_display_name,
-      twitter_profile_image_url: auth.twitter_profile_image_url,
-      twitter_rate_limits: twitterRateLimits?.twitter_rate_limits ?? [],
+      x_user_id: auth.x_user_id,
+      x_username: auth.x_username,
+      x_display_name: auth.x_display_name,
+      x_profile_image_url: auth.x_profile_image_url,
+      x_rate_limits: twitterRateLimits?.x_rate_limits ?? [],
       status: 'authenticated',
     }
   }
@@ -279,11 +279,11 @@ export class AuthXService {
     // Check if current token is still valid
     const now = new Date()
     if (
-      user.twitter_access_token_expires_at &&
-      user.twitter_access_token_expires_at > now
+      user.x_access_token_expires_at &&
+      user.x_access_token_expires_at > now
     ) {
       // Return existing token if not expired
-      if (!user.twitter_access_token) {
+      if (!user.x_access_token) {
         d('Access token not found')
         throw new HTTPException(404, {
           message: 'Access token not found',
@@ -291,11 +291,11 @@ export class AuthXService {
       }
 
       d('Returning existing token')
-      return decryptToken(user.twitter_access_token)
+      return decryptToken(user.x_access_token)
     }
 
     // Ensure refresh token exists
-    if (!user.twitter_refresh_token) {
+    if (!user.x_refresh_token) {
       d('Refresh token not found')
       throw new HTTPException(404, {
         message: 'Refresh token not found',
@@ -303,7 +303,7 @@ export class AuthXService {
     }
 
     // Decrypt stored refresh token
-    const decryptedRefreshToken = decryptToken(user.twitter_refresh_token)
+    const decryptedRefreshToken = decryptToken(user.x_refresh_token)
 
     // Use refresh token to get new access token
     try {

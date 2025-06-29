@@ -92,30 +92,30 @@ export const UserSchema = new Schema<User>(
     },
 
     // Twitter/X
-    twitter_access_token: {
+    x_access_token: {
       type: String,
     },
-    twitter_refresh_token: {
+    x_refresh_token: {
       type: String,
     },
-    twitter_access_token_expires_at: {
+    x_access_token_expires_at: {
       type: Date,
     },
-    twitter_user_id: {
+    x_user_id: {
       type: String,
       unique: true,
       sparse: true,
     },
-    twitter_username: {
+    x_username: {
       type: String,
     },
-    twitter_display_name: {
+    x_display_name: {
       type: String,
     },
-    twitter_profile_image_url: {
+    x_profile_image_url: {
       type: String,
     },
-    twitter_rate_limits: {
+    x_rate_limits: {
       type: [TwitterRateLimitSchema],
       default: [],
     },

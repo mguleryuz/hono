@@ -21,9 +21,9 @@ import {
 interface User {
   role: string
   address?: string
-  twitter_username?: string
-  twitter_display_name?: string
-  twitter_user_id?: string
+  x_username?: string
+  x_display_name?: string
+  x_user_id?: string
   whatsapp_phone?: string
   createdAt: string | Date
 }
@@ -144,7 +144,7 @@ export function UsersTable() {
                 ))
               ) : usersData?.users && usersData.users.length > 0 ? (
                 usersData.users.map((user, index) => (
-                  <TableRow key={user.address || user.twitter_user_id || index}>
+                  <TableRow key={user.address || user.x_user_id || index}>
                     <TableCell>{formatRole(user.role)}</TableCell>
                     <TableCell>
                       {user.address ? (
@@ -157,14 +157,14 @@ export function UsersTable() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {user.twitter_username ? (
+                      {user.x_username ? (
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            @{truncateText(user.twitter_username)}
+                            @{truncateText(user.x_username)}
                           </span>
-                          {user.twitter_display_name && (
+                          {user.x_display_name && (
                             <span className="text-muted-foreground text-xs">
-                              {truncateText(user.twitter_display_name)}
+                              {truncateText(user.x_display_name)}
                             </span>
                           )}
                         </div>

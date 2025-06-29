@@ -105,14 +105,14 @@ describe('User Schemas', () => {
       const validUser = {
         role: 'ADMIN',
         address: '0x1234567890abcdef',
-        twitter_access_token: 'access-token',
-        twitter_refresh_token: 'refresh-token',
-        twitter_access_token_expires_at: new Date(),
-        twitter_user_id: '123456789',
-        twitter_username: 'testuser',
-        twitter_display_name: 'Test User',
-        twitter_profile_image_url: 'https://example.com/image.jpg',
-        twitter_rate_limits: [
+        x_access_token: 'access-token',
+        x_refresh_token: 'refresh-token',
+        x_access_token_expires_at: new Date(),
+        x_user_id: '123456789',
+        x_username: 'testuser',
+        x_display_name: 'Test User',
+        x_profile_image_url: 'https://example.com/image.jpg',
+        x_rate_limits: [
           {
             limit: 15,
             remaining: 14,
@@ -138,7 +138,7 @@ describe('User Schemas', () => {
       const decoded = Schema.decodeUnknownSync(UserSchema)(validUser)
       expect(decoded.role).toBe('ADMIN')
       expect(decoded.address).toBe('0x1234567890abcdef')
-      expect(decoded.twitter_username).toBe('testuser')
+      expect(decoded.x_username).toBe('testuser')
       expect(decoded.api_secrets).toHaveLength(1)
     })
 

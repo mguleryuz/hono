@@ -18,7 +18,7 @@ export const LogoutResponse = Schema.Struct({
 /**
  * @description Twitter/X auth endpoints group with fluent API
  */
-export const twitterAuthGroup = HttpApiGroup.make('twitterAuth')
+export const authXGroup = HttpApiGroup.make('auth-x')
   .add(HttpApiEndpoint.get('login', '/login').addSuccess(LoginResponse))
   .add(
     HttpApiEndpoint.get('callback', '/callback').addSuccess(CallbackResponse)

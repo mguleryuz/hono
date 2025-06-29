@@ -10,11 +10,6 @@ export const UserRoleSchema = Schema.Literal(
 ).annotations({
   title: 'UserRole',
   description: 'User role enumeration defining access levels in the system',
-  examples: [
-    'USER', // Regular user
-    'ADMIN', // Administrator
-    'SUPER', // Super administrator
-  ],
 })
 
 export type UserRole = typeof UserRoleSchema.Type
@@ -136,29 +131,29 @@ export const UserSchema = Schema.Struct({
   }),
 
   // Twitter/X
-  twitter_access_token: Schema.optional(Schema.String).annotations({
+  x_access_token: Schema.optional(Schema.String).annotations({
     description: 'OAuth2 access token for Twitter/X API',
   }),
-  twitter_refresh_token: Schema.optional(Schema.String).annotations({
+  x_refresh_token: Schema.optional(Schema.String).annotations({
     description: 'OAuth2 refresh token for Twitter/X API',
   }),
-  twitter_access_token_expires_at: Schema.optional(Schema.Date).annotations({
+  x_access_token_expires_at: Schema.optional(Schema.Date).annotations({
     description: 'Expiration timestamp for Twitter/X access token',
   }),
 
-  twitter_user_id: Schema.optional(Schema.String).annotations({
+  x_user_id: Schema.optional(Schema.String).annotations({
     description: 'Twitter/X user ID',
   }),
-  twitter_username: Schema.optional(Schema.String).annotations({
+  x_username: Schema.optional(Schema.String).annotations({
     description: 'Twitter/X username (handle without @)',
   }),
-  twitter_display_name: Schema.optional(Schema.String).annotations({
+  x_display_name: Schema.optional(Schema.String).annotations({
     description: 'Twitter/X display name',
   }),
-  twitter_profile_image_url: Schema.optional(Schema.String).annotations({
+  x_profile_image_url: Schema.optional(Schema.String).annotations({
     description: 'URL to Twitter/X profile image',
   }),
-  twitter_rate_limits: Schema.optional(
+  x_rate_limits: Schema.optional(
     Schema.Array(XRateLimitWithContextSchema)
   ).annotations({
     description: 'Array of Twitter/X API rate limit tracking data',

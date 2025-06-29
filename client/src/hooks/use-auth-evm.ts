@@ -30,7 +30,7 @@ export function useAuthEvm() {
   }, [isConnected, signatureRequired, openConnectModal, connectModalOpen])
 
   const sessionQuery = useEffectQuery(
-    'evmAuth',
+    'auth-evm',
     'session',
     {},
     {

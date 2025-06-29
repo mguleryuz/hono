@@ -20,7 +20,7 @@ export const SignOutResponse = Schema.Struct({
 /**
  * @description EVM auth endpoints group with fluent API
  */
-export const evmAuthGroup = HttpApiGroup.make('evmAuth')
+export const authEvmGroup = HttpApiGroup.make('auth-evm')
   .add(HttpApiEndpoint.get('nonce', '/nonce').addSuccess(NonceResponse))
   .add(
     HttpApiEndpoint.post('verify', '/verify')

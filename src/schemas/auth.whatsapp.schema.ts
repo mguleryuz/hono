@@ -35,7 +35,7 @@ export const SignOutResponse = Schema.Struct({
 /**
  * @description WhatsApp auth endpoints group with fluent API
  */
-export const whatsappAuthGroup = HttpApiGroup.make('whatsappAuth')
+export const authWhatsAppGroup = HttpApiGroup.make('auth-whatsapp')
   .add(
     HttpApiEndpoint.post('sendOtp', '/send-otp')
       .setPayload(SendOtpPayload)
