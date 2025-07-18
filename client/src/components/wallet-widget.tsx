@@ -1,16 +1,14 @@
 'use client'
 
-import * as React from 'react'
-import { getAuthMethod } from '@/utils/env'
 import { useAuthEvm, useChainSpecs } from '@c/hooks'
 import { cn } from '@c/utils'
 import { useAccountModal, useConnectModal } from '@rainbow-me/rainbowkit'
 import { CircleAlert, PenTool, Pointer, Wallet } from 'lucide-react'
 
-import { Button } from './ui/button'
 import type { ButtonProps } from './ui/button'
+import { Button } from './ui/button'
 
-const authMethod = getAuthMethod()
+const authMethod = window.APP_CONFIG.AUTH_METHOD
 const isEvmAuth = authMethod === 'evm'
 
 const compressAddress = (address?: string) => {

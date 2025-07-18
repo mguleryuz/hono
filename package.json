@@ -5,9 +5,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "NODE_ENV=production bun dist/index.js",
+    "start": "NODE_ENV=production bun src/index.ts",
     "build:client": "NODE_ENV=production bun --cwd=client vite build",
-    "dev": "concurrently \"bun --cwd=client vite dev\" \"NODE_ENV=development bun --watch run src/index.ts\"",
+    "dev": "concurrently \"bun --cwd=client vite dev\" \"DEBUG=*,-MongoMS*,-hono-sess*,-connect-mongo*,-pulse* NODE_ENV=development bun --watch run src/index.ts\"",
+    "typecheck": "tsc --noEmit",
     "watch": "tsc -w -p ./tsconfig.json",
     "docker": "chmod +x docker.sh && ./docker.sh",
     "postinstall": "husky || true",
@@ -15,7 +16,9 @@
     "release:alpha": "standard-version -a --prerelease alpha --skip.changelog",
     "release:beta": "standard-version -a --prerelease beta --skip.changelog",
     "release:pub": "git push --follow-tags origin $(git rev-parse --abbrev-ref HEAD)",
-    "setup": "bun scripts/setup-metadata.ts"
+    "setup": "bun scripts/setup-metadata.ts",
+    "test": "NODE_ENV=test bun test",
+    "test:watch": "NODE_ENV=test bun test --watch"
   },
   "lint-staged": {
     "src/**/*.{mjs,cjs,js,ts,d.ts}": [
@@ -68,10 +71,12 @@
     "@tanstack/react-query": "^5.81.5",
     "@tanstack/react-router": "^1.122.0",
     "@twitter-api-v2/plugin-rate-limit": "^1.1.0",
+    "@types/dom-to-image": "^2.6.7",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
     "connect-mongo": "^5.1.0",
     "date-fns": "^4.1.0",
+    "dom-to-image": "^2.6.0",
     "effect": "^3.16.10",
     "embla-carousel-react": "^8.6.0",
     "hono": "^4.8.3",

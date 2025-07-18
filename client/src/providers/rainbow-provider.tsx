@@ -1,7 +1,6 @@
 'use client'
 
 // Third-party dependencies
-import { getAuthMethod } from '@/utils/env'
 import { useAuthEvm } from '@c/hooks'
 import {
   createAuthenticationAdapter,
@@ -12,7 +11,7 @@ import { createSiweMessage } from 'viem/siwe'
 
 import '@rainbow-me/rainbowkit/styles.css'
 
-const authMethod = getAuthMethod()
+const authMethod = window.APP_CONFIG.AUTH_METHOD
 const isEvmAuth = authMethod === 'evm'
 
 // ============================================================================
@@ -50,7 +49,7 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
         version: '1',
         chainId,
         nonce,
-        statement: 'EVM Sign in by <project_name>',
+        statement: 'Connect your wallet to InfoFi',
       }),
     verify: async ({ message, signature }) => {
       try {
@@ -87,7 +86,7 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
         showRecentTransactions={true}
         avatar={() => (
           <img
-            src="/images/icon.svg"
+            src="/images/icon.png"
             alt="<project_name>"
             width={60}
             height={60}
@@ -122,12 +121,12 @@ export function RainbowProvider({ children }: { children: React.ReactNode }) {
             generalBorder: 'var(--border)',
             generalBorderDim: 'var(--border)',
             menuItemBackground: 'var(--background)',
-            modalBackdrop: 'var(--background)',
+            modalBackdrop: 'hsla(0, 0%, 0%, 0.5)',
             modalBackground: 'var(--background)',
             modalBorder: 'var(--border)',
             modalText: 'var(--foreground)',
-            modalTextDim: 'var(--muted)',
-            modalTextSecondary: 'var(--muted)',
+            modalTextDim: 'var(--accent)',
+            modalTextSecondary: 'var(--accent)',
             profileAction: 'var(--secondary)',
             profileActionHover: 'var(--secondary-hover)',
             profileForeground: 'var(--background)',

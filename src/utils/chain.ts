@@ -1,8 +1,16 @@
-import type { Chain, HttpTransport, PublicClient } from 'viem'
-import { createPublicClient, http } from 'viem'
+import type {
+  Account,
+  Chain,
+  HttpTransport,
+  PublicClient,
+  Transport,
+  WalletClient,
+} from 'viem'
+import { createPublicClient, createWalletClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 import * as internalChains from 'viem/chains'
 
-export const chains = [internalChains.sepolia, internalChains.polygon] as const
+import { getAdminPrivateKey } from './env'
 
 /**
  * Get a chain by its id
@@ -14,6 +22,8 @@ export const getChainById = (chainId: number): Chain => {
   if (!chain) throw new Error('Chain not found')
   return chain
 }
+
+export const chains = [internalChains.optimismSepolia] as [Chain, ...Chain[]]
 
 /**
  * Get all chain names
@@ -49,26 +59,56 @@ export const getERPCTransport = (chainId: number): HttpTransport => {
   })
 }
 
-const clientCache = new Map<number, PublicClient>()
+const clientCache = new Map<number, PublicClient<Transport, Chain>>()
 
 /**
  * Get a public client for a specific chain
  */
-export const getPublicClient = async (chainId: number) => {
+export const getPublicClient = async (
+  chainId: number
+): Promise<PublicClient<Transport, Chain>> => {
   const cachedClient = clientCache.get(chainId)
   if (cachedClient) return cachedClient
 
-  const chain = chains.find((chain) => chain.id === chainId)
+  const chain = getChainById(chainId)
 
   if (!chain) throw new Error(`Chain with ID ${chainId} not found`)
 
   const publicClient = createPublicClient({
     chain,
     transport: getERPCTransport(chainId),
-    cacheTime: 5000, // 5 seconds
-  })
+    cacheTime: 10000, // 10 seconds
+  }) as PublicClient<Transport, Chain>
 
   clientCache.set(chainId, publicClient)
 
   return publicClient
+}
+
+const walletClientCache = new Map<
+  number,
+  WalletClient<Transport, Chain, Account>
+>()
+
+export const getWalletClient = async (
+  chainId: number
+): Promise<WalletClient<Transport, Chain, Account>> => {
+  const PRIVATE_KEY = getAdminPrivateKey()
+  if (!PRIVATE_KEY) throw new Error('Admin private key not configured')
+
+  const cachedClient = walletClientCache.get(chainId)
+  if (cachedClient) return cachedClient
+
+  const account = privateKeyToAccount(PRIVATE_KEY)
+  const publicClient = await getPublicClient(chainId)
+
+  const walletClient = createWalletClient({
+    account,
+    chain: publicClient.chain,
+    transport: getERPCTransport(chainId),
+  })
+
+  walletClientCache.set(chainId, walletClient)
+
+  return walletClient
 }

@@ -20,7 +20,7 @@ export type AuthMethod = 'evm' | 'whatsapp' | 'x' | 'none'
  * @returns {AuthMethod} The authentication method (evm, whatsapp, or none)
  */
 export const getAuthMethod = () =>
-  getEnvValue<AuthMethod>('VITE_AUTH_METHOD', 'VITE_AUTH_METHOD', 'none')
+  getEnvValue<AuthMethod>('AUTH_METHOD', 'AUTH_METHOD', 'none')
 
 /**
  * @description Get the session secret for secure session management
@@ -38,7 +38,15 @@ export const getSessionSecret = () =>
  * @returns {string | undefined} The OpenAI API key
  */
 export const getOpenAiApiKey = () =>
-  getEnvValue<string>('OPENAI_API_KEY', 'OPENAI_API_KEY')
+  getEnvValue<string>(
+    'OPENAI_API_KEY',
+    'OPENAI_API_KEY',
+    undefined,
+    (value) => {
+      process.env.OPENAI_API_KEY = value
+      return value
+    }
+  )
 
 /**
  * @description Get the Google Generative AI API key for AI/ML operations
@@ -55,20 +63,6 @@ export const getGoogleGenerativeAiApiKey = () =>
     }
   )
 
-/**
- * @description Get the Social Data Tools API key
- * @returns {string | undefined} The Social Data Tools API key
- */
-export const getSocialDataToolsApiKey = () =>
-  getEnvValue<string>('SOCIALDATA_TOOLS_API_KEY', 'SOCIALDATA_TOOLS_API_KEY')
-
-/**
- * @description Get the DRPC API key for blockchain RPC access
- * @returns {string | undefined} The DRPC API key
- */
-export const getDrpcApiKey = () =>
-  getEnvValue<string>('VITE_DRPC_API_KEY', 'VITE_DRPC_API_KEY')
-
 // =============================================================================
 // INFRASTRUCTURE & DATABASE
 // =============================================================================
@@ -84,6 +78,13 @@ export const getOrigin = () => getEnvValue<string>('ORIGIN', 'ORIGIN')
  * @returns {string | undefined} The MongoDB connection string
  */
 export const getMongoUri = () => getEnvValue<string>('MONGO_URI', 'MONGO_URI')
+
+/**
+ * @description Get the admin private key for contract operations
+ * @returns {string | undefined} The admin private key
+ */
+export const getAdminPrivateKey = () =>
+  getEnvValue<`0x${string}`>('ADMIN_PRIVATE_KEY', 'ADMIN_PRIVATE_KEY')
 
 // =============================================================================
 // SENDPULSE CONFIGURATION

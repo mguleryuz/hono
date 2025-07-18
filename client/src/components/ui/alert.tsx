@@ -3,16 +3,13 @@ import { cn } from '@c/utils'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 const alertVariants = cva(
-  'relative w-full rounded-lg border border-border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground',
+  'relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current',
   {
     variants: {
       variant: {
-        default: 'bg-background text-foreground',
+        default: 'bg-card/20 text-card-foreground',
         destructive:
-          'border-destructive/50 text-destructive [&>svg]:text-destructive',
-        warning: 'border-warning/20 text-warning [&>svg]:text-warning',
-        success: 'border-success/20 text-success [&>svg]:text-success',
-        error: 'border-error/20 text-error [&>svg]:text-error',
+          'text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90',
       },
     },
     defaultVariants: {
@@ -57,7 +54,7 @@ function AlertDescription({
     <div
       data-slot="alert-description"
       className={cn(
-        'text-muted col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed',
+        'text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed',
         className
       )}
       {...props}
@@ -65,4 +62,4 @@ function AlertDescription({
   )
 }
 
-export { Alert, AlertTitle, AlertDescription }
+export { Alert, AlertDescription, AlertTitle }

@@ -34,7 +34,7 @@ export const CopyableAddress = ({
     <div className="flex w-fit items-center gap-2">
       <code
         className={cn(
-          'bg-muted max-w-[150px] truncate rounded px-2 py-1 text-xs sm:max-w-none sm:text-sm',
+          'bg-secondary/80 max-w-[150px] truncate rounded px-2 py-1 text-xs sm:max-w-none sm:text-sm',
           {
             'cursor-pointer hover:underline': Boolean(onCodeClick),
           }

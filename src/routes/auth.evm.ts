@@ -7,7 +7,7 @@ export const authEvm = new Hono()
 
 authEvm.get('/nonce', async (c) => {
   try {
-    const nonce = await authEvmService.nonce(c)
+    const nonce = authEvmService.nonce(c)
     return c.text(nonce)
   } catch (error: unknown) {
     const e = error as HTTPException

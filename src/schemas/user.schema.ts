@@ -73,6 +73,9 @@ export const UserSchema = Schema.Struct({
   x_profile_image_url: Schema.optional(Schema.String).annotations({
     description: 'URL to Twitter/X profile image',
   }),
+  x_bio: Schema.optional(Schema.String).annotations({
+    description: 'Twitter/X bio',
+  }),
 
   // WhatsApp
   whatsapp_phone: Schema.optional(Schema.String).annotations({

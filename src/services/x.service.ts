@@ -14,7 +14,7 @@ import { CacheContainer } from 'node-ts-cache'
 import { MemoryStorage } from 'node-ts-cache-storage-memory'
 import { TwitterApi } from 'twitter-api-v2'
 
-import { authXService } from '..'
+import type { AuthXService } from './auth.x.service'
 
 // Simple rate limit response used throughout the app
 export interface RateLimitInfo {
@@ -33,8 +33,10 @@ export class XService {
   private _rateLimitStore: TwitterRateLimitMongoStore
   private _appRateLimitPlugin: TwitterApiRateLimitPlugin
   private _appRateLimitStore: TwitterRateLimitMongoStore
+  private _authService: AuthXService | undefined
 
-  constructor() {
+  constructor(authService?: AuthXService) {
+    this._authService = authService
     const clientId = getXClientId()
     const clientSecret = getXClientSecret()
 
@@ -101,6 +103,10 @@ export class XService {
     return this._appRateLimitStore
   }
 
+  setAuthService(authService: AuthXService) {
+    this._authService = authService
+  }
+
   /**
    * Creates an authenticated Twitter client for a user
    */
@@ -149,7 +155,7 @@ export class XService {
       }
 
       // Attempt to get a fresh token
-      const freshToken = await authXService.getAccessToken(userId)
+      const freshToken = await this._authService?.getAccessToken(userId)
 
       if (freshToken) {
         logger.info(
@@ -177,7 +183,7 @@ export class XService {
     user: User & { id: string },
     validateToken: boolean = false
   ): Promise<TwitterApi | null> {
-    const accessToken = await authXService.getAccessToken(user.id)
+    const accessToken = await this._authService?.getAccessToken(user.id)
 
     if (!accessToken) {
       logger.error(

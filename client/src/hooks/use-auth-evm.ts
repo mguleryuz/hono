@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { getAuthMethod } from '@/utils/env'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAccount } from 'wagmi'
@@ -12,7 +11,7 @@ import {
   useEffectQuery,
 } from './use-tanstack-effect'
 
-const authMethod = getAuthMethod()
+const authMethod = window.APP_CONFIG.AUTH_METHOD
 const isAuthEvmEnabled = authMethod === 'evm'
 
 export type UseAuthEvmReturnType = ReturnType<typeof useAuthEvm>

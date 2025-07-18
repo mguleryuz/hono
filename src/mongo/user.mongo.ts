@@ -46,6 +46,9 @@ export const UserSchema = new Schema<User>(
     },
 
     // Twitter/X
+    x_bio: {
+      type: String,
+    },
     x_access_token: {
       type: String,
     },

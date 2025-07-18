@@ -1,8 +1,13 @@
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
+@utility gradient {
+  @apply animate-gradient from-background to-primary/10 hover:to-primary/20;
+  background-size: 400%;
 }
 
-.scrollbar-none {
+@utility scrollbar-none {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }

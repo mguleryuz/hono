@@ -2,7 +2,36 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: 'PowerGrotesk';
+  font-family:
+    'PowerGrotesk',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    sans-serif;
+}
+
+/* Ensure smooth font loading transition for headings */
+html.font-loading h1,
+html.font-loading h2,
+html.font-loading h3,
+html.font-loading h4 {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 700; /* Use a heavier weight to approximate PowerGrotesk */
+}
+
+html.fonts-loaded h1,
+html.fonts-loaded h2,
+html.fonts-loaded h3,
+html.fonts-loaded h4 {
+  font-family:
+    'PowerGrotesk',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    sans-serif;
 }
 
 h1 {
@@ -46,5 +75,5 @@ td {
 }
 
 code {
-  @apply bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+  @apply bg-secondary/80 relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
 }

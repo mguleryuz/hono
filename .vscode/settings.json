@@ -1,5 +1,7 @@
 {
-  "tailwindCSS.experimental.configFile": "client/styles/global.css",
+  "git.detectSubmodules": false,
+  "git.detectSubmodulesLimit": 0,
+  "tailwindCSS.experimental.configFile": "./client/src/styles/global.css",
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",

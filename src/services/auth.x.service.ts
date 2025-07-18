@@ -1,5 +1,6 @@
 import { UserModel } from '@/mongo/user.mongo'
-import type { GetCleanSuccessType, User } from '@/types'
+import type { User } from '@/schemas'
+import type { GetCleanSuccessType } from '@/types'
 import { getOrigin } from '@/utils'
 import { decryptToken, encryptToken } from '@/utils/server'
 import debug from 'debug'
@@ -50,9 +51,6 @@ export class AuthXService {
         'offline.access',
         'follows.read',
         'like.read',
-        'dm.write',
-        'tweet.write',
-        'like.write',
       ],
       // Request user's email if your app has permission
       // X requires special approval for email scope
@@ -70,15 +68,17 @@ export class AuthXService {
     // Generate auth URL and state for security
     const { url, codeVerifier, state } = this.generateAuthLink()
 
-    // Initialize auth session if needed
-    if (!c.req.session.auth) {
-      d('Auth session not initialized')
-      c.req.session.auth = {} as any
-    }
+    // Get returnTo parameter from query string
+    const returnTo = c.req.query('returnTo')
 
     // Store verification data in session for callback verification
-    c.req.session.auth.twitterCodeVerifier = codeVerifier
-    c.req.session.auth.twitterState = state
+    c.req.session.twitterCodeVerifier = codeVerifier
+    c.req.session.twitterState = state
+
+    // Store the returnTo URL for redirecting after successful authentication
+    if (returnTo) {
+      c.req.session.returnTo = returnTo
+    }
 
     // Redirect the user to the Twitter auth URL
     return c.redirect(url)
@@ -90,15 +90,22 @@ export class AuthXService {
   async callback(c: Context) {
     const { code, state } = c.req.query()
 
+    // Get the returnTo URL from session for error redirects
+    const returnTo = c.req.session.returnTo || '/'
+
     // Verify state parameter to prevent CSRF attacks
-    if (state !== c.req.session.auth.twitterState) {
+    if (state !== c.req.session.twitterState) {
       console.error('Invalid state parameter')
-      return c.redirect('/')
+      // Clean up session and redirect
+      delete c.req.session.returnTo
+      return c.redirect(returnTo)
     }
 
     // Handle case when user canceled authentication
     if (!code) {
-      return c.redirect('/')
+      // Clean up session and redirect
+      delete c.req.session.returnTo
+      return c.redirect(returnTo)
     }
 
     try {
@@ -113,13 +120,13 @@ export class AuthXService {
       const { client, accessToken, refreshToken, expiresIn } =
         await this.client.loginWithOAuth2({
           code,
-          codeVerifier: c.req.session.auth.twitterCodeVerifier!,
+          codeVerifier: c.req.session.twitterCodeVerifier!,
           redirectUri: this.callbackUrl,
         })
 
       // Fetch user profile information from Twitter
       const twitterUser = await client.v2.me({
-        'user.fields': ['profile_image_url', 'username', 'name'],
+        'user.fields': ['profile_image_url', 'username', 'name', 'description'],
       })
 
       // Calculate token expiration timestamp
@@ -129,36 +136,45 @@ export class AuthXService {
       // Prepare user data for database storage
       const userData: Partial<User> = {
         x_username: twitterUser.data.username,
+        x_bio: twitterUser.data.description,
         x_display_name: twitterUser.data.name,
         x_profile_image_url: twitterUser.data.profile_image_url,
         x_access_token: encryptToken(accessToken),
         x_refresh_token: encryptToken(refreshToken),
         x_access_token_expires_at: expiresAt,
-        address: undefined,
       }
 
       // Upsert user in database - update if exists, create if new
       const user = await UserModel.findOneAndUpdate(
-        { twitterUserId: twitterUser.data.id },
+        { x_user_id: twitterUser.data.id },
         {
-          $set: userData,
-          $setOnInsert: { twitterUserId: twitterUser.data.id },
+          $set: {
+            ...userData,
+          },
+          $setOnInsert: { x_user_id: twitterUser.data.id },
         },
         { new: true, upsert: true }
-      )
+      ).lean()
+
+      if (!user) {
+        throw new Error('Failed to create/update user')
+      }
 
       // Set up user session with necessary authentication data
       Object.assign(c.req.session, {
+        mongo_id: user._id.toString(),
         role: user.role,
-        id: user._id.toString(),
 
-        address: user.address,
-
-        x_user_id: user.x_user_id,
+        // X data
+        x_user_id: twitterUser.data.id,
         x_username: user.x_username,
+        x_bio: user.x_bio,
         x_display_name: user.x_display_name,
         x_profile_image_url: user.x_profile_image_url,
         x_access_token_expires_at: expiresAt,
+
+        // EVM data (if exists)
+        address: user.address,
       })
 
       // Set a longer session duration (30 days) instead of using Twitter's expiration time
@@ -167,33 +183,36 @@ export class AuthXService {
       c.req.session.cookie.maxAge = maxAge
 
       d(
-        `Saved user session.auth, with maxAge: ${maxAge / 1000 / 60 / 60 / 24} in days, ${c.req.session.auth}`
+        `Saved user session, with maxAge: ${maxAge / 1000 / 60 / 60 / 24} in days, ${c.req.session}`
       )
 
-      // Redirect to homepage after successful authentication
-      return c.redirect('/')
+      // Get the returnTo URL from session, default to homepage if not set
+      const returnTo = c.req.session.returnTo || '/'
+
+      // Clean up the returnTo from session
+      delete c.req.session.returnTo
+
+      // Redirect to the stored URL or homepage after successful authentication
+      return c.redirect(returnTo)
     } catch (error) {
       console.error('Twitter auth error:', error)
-      // Gracefully handle errors by redirecting to homepage
-      return c.redirect('/')
+      // Clean up session and gracefully handle errors by redirecting to returnTo URL
+      delete c.req.session.returnTo
+      return c.redirect(returnTo)
     }
   }
 
   //=============================================================================
   // USER SESSION MANAGEMENT
   //=============================================================================
-
   /**
    * Get current authenticated user information from session
    */
   async getSession(c: Context): Promise<TwitterSessionType> {
     const session = c.req.session
-    const { auth } = session
-
-    d('Current user session.auth', auth)
 
     // Check if user is authenticated
-    if (!auth.twitterUserId) {
+    if (!session.twitterUserId) {
       d('User is not authenticated')
       throw new HTTPException(401, {
         message: 'Not authenticated',
@@ -204,7 +223,7 @@ export class AuthXService {
 
     // Try to get a valid access token
     try {
-      accessToken = await this.getAccessToken(auth.id)
+      accessToken = await this.getAccessToken(session.mongo_id as string)
     } catch {}
 
     // Destroy session if token is invalid or expired
@@ -217,7 +236,7 @@ export class AuthXService {
     }
 
     // Verify user still exists in database
-    const userExists = await UserModel.exists({ _id: auth.id })
+    const userExists = await UserModel.exists({ _id: session.mongo_id })
 
     // Handle case where user was deleted
     if (!userExists) {
@@ -227,22 +246,21 @@ export class AuthXService {
       })
     }
 
-    const twitterRateLimits = await UserModel.findById(auth.id, {
+    const twitterRateLimits = await UserModel.findById(session.mongo_id, {
       twitterRateLimits: 1,
     }).lean()
 
     // Return user data from session matching schema
     return {
-      mongo_id: auth.id,
-      role: auth.role,
-      x_user_id: auth.x_user_id,
-      x_username: auth.x_username,
-      x_display_name: auth.x_display_name,
-      x_profile_image_url: auth.x_profile_image_url,
+      mongo_id: session.mongo_id!,
+      role: session.role!,
+      x_user_id: session.x_user_id,
+      x_username: session.x_username,
+      x_display_name: session.x_display_name,
+      x_profile_image_url: session.x_profile_image_url,
       status: 'authenticated',
     }
   }
-
   /**
    * Logout user by destroying session
    */
@@ -262,10 +280,10 @@ export class AuthXService {
     // Find user in database with token information
     const user = await UserModel.findById(
       userId,
-      'twitterAccessToken twitterRefreshToken twitterAccessTokenExpiresAt'
+      'x_access_token x_refresh_token x_access_token_expires_at'
     )
 
-    d('Got user for fresh access token', user)
+    d('Got user for fresh access token')
 
     // Handle user not found
     if (!user) {
@@ -290,7 +308,7 @@ export class AuthXService {
       }
 
       d('Returning existing token')
-      return decryptToken(user.x_access_token)
+      return decryptToken(user.x_access_token as string)
     }
 
     // Ensure refresh token exists
@@ -302,7 +320,7 @@ export class AuthXService {
     }
 
     // Decrypt stored refresh token
-    const decryptedRefreshToken = decryptToken(user.x_refresh_token)
+    const decryptedRefreshToken = decryptToken(user.x_refresh_token as string)
 
     // Use refresh token to get new access token
     try {
@@ -327,9 +345,9 @@ export class AuthXService {
 
       // Update user record with new token information
       await UserModel.findByIdAndUpdate(userId, {
-        twitterAccessToken: encryptedAccessToken,
-        twitterRefreshToken: encryptedRefreshToken,
-        twitterAccessTokenExpiresAt: expiresAt,
+        x_access_token: encryptedAccessToken,
+        x_refresh_token: encryptedRefreshToken,
+        x_access_token_expires_at: expiresAt,
       })
 
       // Return the access token

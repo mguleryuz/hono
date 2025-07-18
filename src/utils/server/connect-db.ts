@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 
 import { getMongoUri } from '../env'
+import { createDirIfNotExists } from './misc'
 
 // Connection state tracking
 let isConnected = false
@@ -8,17 +9,20 @@ let retryCount = 0
 const MAX_RETRIES = 5
 const INITIAL_BACKOFF_MS = 1000
 const DB_NAME = 'hono'
+const USE_MEMORY_SERVER = process.env.USE_MEMORY_SERVER !== 'false'
 
 // Memory server instance for development
 let mongoMemoryServer: any = null
 
 // Environment check
-const isDevelopment = process.env.NODE_ENV === 'development'
+const isDevelopment = (useMemoryServer: boolean) =>
+  useMemoryServer &&
+  (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')
 
 // Static port for MongoDB Memory Server
 const MEMORY_SERVER_PORT = 27018 // Using 27018 to avoid conflicts with default MongoDB
 
-export async function connectDb() {
+export async function connectDb(useMemoryServer = Boolean(USE_MEMORY_SERVER)) {
   try {
     // If already connected, return
     if (isConnected && mongoose.connection.readyState === 1) {
@@ -34,7 +38,7 @@ export async function connectDb() {
 
     let MONGO_URI: string
 
-    if (isDevelopment) {
+    if (isDevelopment(useMemoryServer)) {
       // First, try to connect to existing MongoDB instance on the port
       MONGO_URI = `mongodb://127.0.0.1:${MEMORY_SERVER_PORT}/${DB_NAME}`
       console.log(`🔍 Development mode - checking for MongoDB at: ${MONGO_URI}`)
@@ -73,6 +77,7 @@ export async function connectDb() {
 
         if (!mongoMemoryServer) {
           try {
+            const dbPath = createDirIfNotExists('.cache/db')
             console.log(
               `🚀 Creating MongoDB Memory Server on port ${MEMORY_SERVER_PORT}...`
             )
@@ -80,10 +85,11 @@ export async function connectDb() {
               instance: {
                 dbName: DB_NAME,
                 port: MEMORY_SERVER_PORT,
+                dbPath,
               },
             })
 
-            MONGO_URI = mongoMemoryServer.getUri()
+            MONGO_URI = mongoMemoryServer.getUri() + DB_NAME
             console.log('✅ MongoDB Memory Server started')
             console.log(`📊 Memory Server details:`)
             console.log(`   - URI: ${MONGO_URI}`)

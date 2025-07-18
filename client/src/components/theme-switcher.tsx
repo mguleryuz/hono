@@ -73,10 +73,7 @@ export function ThemeSwitcher({
         <Button
           variant="ghost"
           size="icon"
-          className={cn(
-            'flex size-9 items-center justify-center bg-gradient-to-r from-[hsl(165,82%,51%)]/10 to-[hsl(280,68%,60%)]/10 hover:from-[hsl(165,82%,51%)]/15 hover:to-[hsl(280,68%,60%)]/15',
-            className
-          )}
+          className={cn('flex size-9 items-center justify-center', className)}
         >
           <CurrentIcon className="size-4 transition-transform hover:rotate-12" />
           <span className="sr-only">Toggle theme</span>

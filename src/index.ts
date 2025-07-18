@@ -1,6 +1,5 @@
 // Handlers
 import { Jobs } from '@/jobs'
-import { stopPulse } from '@/mongo'
 import { Routes } from '@/routes'
 import { BucketService } from '@/services/bucket.service'
 import { logger as log } from '@/utils/logger'
@@ -18,9 +17,13 @@ import {
   UserService,
   XService,
 } from './services'
+import { getGoogleGenerativeAiApiKey, getOpenAiApiKey } from './utils'
 
 // ------------------------------------------------------------
 // Server
+
+getGoogleGenerativeAiApiKey()
+getOpenAiApiKey()
 
 // Environment configuration
 const isDev = process.env.NODE_ENV === 'development'
@@ -81,9 +84,6 @@ app.use(
 // Database connection
 await connectDb()
 
-// Initialize jobs after database connection
-new Jobs()
-
 // Session handling
 try {
   app.use(sessionMiddleware())
@@ -93,32 +93,23 @@ try {
 
 // Start services
 export const bucketService = new BucketService()
-export const authEvmService = new AuthEvmService()
 export const xService = new XService()
 export const authXService = new AuthXService(xService.client)
+// Set the auth service on the X service after both are created
+xService.setAuthService(authXService)
+export const authEvmService = new AuthEvmService()
 export const authWhatsAppService = new AuthWhatsAppService()
 export const userService = new UserService()
+export const jobs = new Jobs()
 
 // Setup routes
 new Routes(app, isDev)
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
 
-// Graceful shutdown handler
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM signal received: closing HTTP server')
-  await stopPulse()
-  process.exit(0)
-})
-
-process.on('SIGINT', async () => {
-  console.log('SIGINT signal received: closing HTTP server')
-  await stopPulse()
-  process.exit(0)
-})
-
 // Export server configuration
 export default {
   port,
   fetch: app.fetch,
+  idleTimeout: 120, // 2 minutes timeout for long-running operations
 }

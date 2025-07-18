@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy package files and workspace structure first to leverage cache
 COPY package.json bun.lock ./
-COPY packages/sendpulse-whatsapp/package.json ./packages/sendpulse-whatsapp/
+COPY packages ./packages
 
 # Install all dependencies once instead of twice
 # Skip setup script in Docker builds

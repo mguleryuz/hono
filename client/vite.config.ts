@@ -12,16 +12,16 @@ export default ({ mode }: { mode: string }) => {
   const serverPath = path.resolve(__dirname, '../src')
 
   // Load env vars from parent directory
-  const NODE_ENV = process.env.NODE_ENV
-  process.env = loadEnv(mode, path.resolve(__dirname, '..'))
-  process.env.NODE_ENV = NODE_ENV
+  loadEnv(mode, path.resolve(__dirname, '..'))
 
   const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8080
   const isProd = mode === 'production'
 
   return defineConfig({
     define: {
-      'process.env': process.env,
+      // Only expose NODE_ENV to client for development checks
+      // Configuration comes from server-injected window.APP_CONFIG
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || mode),
     },
     plugins: [
       tailwindcss(),
@@ -96,7 +96,21 @@ export default ({ mode }: { mode: string }) => {
           // Use content hash for better caching
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',
-          assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+          assetFileNames: (assetInfo) => {
+            // Special handling for app icon to ensure optimal caching
+            if (assetInfo.name === 'icon.png') {
+              return 'assets/images/icon.[hash].png'
+            }
+            // Special handling for fonts to ensure proper caching
+            if (assetInfo.name?.match(/\.(woff|woff2|eot|ttf|otf)$/)) {
+              return 'assets/fonts/[name]-[hash].[ext]'
+            }
+            // Special handling for images to ensure proper caching
+            if (assetInfo.name?.match(/\.(png|jpe?g|svg|gif|webp|avif)$/)) {
+              return 'assets/images/[name]-[hash].[ext]'
+            }
+            return 'assets/[ext]/[name]-[hash].[ext]'
+          },
         },
       },
       // Set chunk size warning limit
@@ -105,8 +119,10 @@ export default ({ mode }: { mode: string }) => {
       sourcemap: false,
       // CSS code splitting
       cssCodeSplit: true,
-      // Asset inlining threshold
-      assetsInlineLimit: 4096,
+      // Asset inlining threshold - increased for better logo performance
+      assetsInlineLimit: 8192, // 8KB instead of 4KB
+      // Add image optimization
+      assetsDir: 'assets',
     },
     optimizeDeps: {
       // Pre-bundle dependencies for faster dev server startup
@@ -133,6 +149,11 @@ export default ({ mode }: { mode: string }) => {
           target: `http://127.0.0.1:${PORT}`,
           changeOrigin: true,
         },
+      },
+      // Add headers for font caching
+      headers: {
+        'Cache-Control': 'public, max-age=31536000', // 1 year cache for static assets
+        // Special headers for different asset types can be handled by middleware
       },
     },
   })

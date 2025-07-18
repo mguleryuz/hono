@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
 
-    <!-- Preload critical fonts -->
+    <!-- Preload critical fonts with better caching -->
     <link
       rel="preload"
       href="/fonts/Archivo-Regular.ttf"
@@ -21,6 +21,15 @@
       as="font"
       type="font/ttf"
       crossorigin="anonymous"
+    />
+
+    <!-- Preload app logo for instant display -->
+    <link
+      rel="preload"
+      href="/images/icon.png"
+      as="image"
+      type="image/png"
+      fetchpriority="high"
     />
 
     <!-- Preconnect to external origins -->
@@ -64,6 +73,54 @@
         // Add no-transitions class to prevent initial transition flash
         document.documentElement.classList.add('no-transitions', resolved)
 
+        // Font loading detection to prevent font flash
+        function loadFonts() {
+          if ('fonts' in document) {
+            // Use Font Loading API if available
+            const fonts = [
+              new FontFace('Archivo', 'url(/fonts/Archivo-Regular.ttf)'),
+              new FontFace(
+                'PowerGrotesk',
+                'url(/fonts/PowerGrotesk-Regular.ttf)'
+              ),
+            ]
+
+            Promise.all(
+              fonts.map((font) => {
+                document.fonts.add(font)
+                return font.load()
+              })
+            )
+              .then(() => {
+                document.documentElement.classList.add('fonts-loaded')
+                document.documentElement.classList.remove('font-loading')
+              })
+              .catch(() => {
+                // Fallback: show content after timeout even if fonts fail
+                setTimeout(() => {
+                  document.documentElement.classList.add('fonts-loaded')
+                  document.documentElement.classList.remove('font-loading')
+                }, 3000)
+              })
+          } else {
+            // Fallback for browsers without Font Loading API
+            setTimeout(() => {
+              document.documentElement.classList.add('fonts-loaded')
+              document.documentElement.classList.remove('font-loading')
+            }, 100)
+          }
+        }
+
+        // Start font loading
+        document.documentElement.classList.add('font-loading')
+
+        // Load fonts when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', loadFonts)
+        } else {
+          loadFonts()
+        }
+
         // Remove no-transitions class after a brief delay
         setTimeout(() => {
           document.documentElement.classList.remove('no-transitions')
@@ -78,14 +135,25 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
+        /* Prevent font flash by ensuring fonts are ready */
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       }
 
       body {
         margin: 0;
         font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-          sans-serif;
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      }
+
+      /* Hide content until fonts are loaded to prevent flash */
+      .font-loading {
+        visibility: hidden;
+      }
+
+      /* Show content when fonts are ready */
+      .fonts-loaded {
+        visibility: visible;
       }
 
       #app {
@@ -97,22 +165,7 @@
         transition: none;
       }
 
-      /* Font-face definitions with font-display: swap for better performance */
-      @font-face {
-        font-family: 'Archivo';
-        src: url('/fonts/Archivo-Regular.ttf') format('truetype');
-        font-weight: 400;
-        font-style: normal;
-        font-display: swap;
-      }
-
-      @font-face {
-        font-family: 'PowerGrotesk';
-        src: url('/fonts/PowerGrotesk-Regular.ttf') format('truetype');
-        font-weight: 400;
-        font-style: normal;
-        font-display: swap;
-      }
+      /* Font-face definitions moved to global.css for better organization */
     </style>
   </head>
 
