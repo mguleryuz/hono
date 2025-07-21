@@ -74,7 +74,7 @@ const OGImage = ({ withBackground }: { withBackground: boolean }) => {
   return (
     <div
       id="og-image"
-      className={`relative flex items-center justify-center font-[Satoshi-Black] ${
+      className={`relative flex items-center justify-center font-[PowerGrotesk] ${
         withBackground
           ? 'from-background to-primary/20 bg-gradient-to-tl'
           : 'bg-transparent'
@@ -104,7 +104,7 @@ const TwitterBanner = ({ withBackground }: { withBackground: boolean }) => {
       }`}
       style={{ width: '1500px', height: '500px' }}
     >
-      <span className="from-primary via-foreground to-primary bg-gradient-to-r bg-clip-text font-[Satoshi-Black] text-7xl font-bold text-transparent">
+      <span className="from-primary via-foreground to-primary bg-gradient-to-r bg-clip-text font-[PowerGrotesk] text-7xl font-bold text-transparent">
         Hono
       </span>
     </div>

@@ -79,7 +79,7 @@ export function AppSidebar() {
                   />
                 </div>
                 {isExpanded && (
-                  <div className="flex flex-col gap-0.5 font-[Satoshi-Black] leading-none">
+                  <div className="flex flex-col gap-0.5 font-[PowerGrotesk] leading-none">
                     <span className="from-primary via-foreground to-primary bg-gradient-to-r bg-clip-text text-lg font-bold text-transparent">
                       {'<app_title>'}
                     </span>
